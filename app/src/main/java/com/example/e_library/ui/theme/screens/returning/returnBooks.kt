@@ -23,15 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.e_library.data.BooksViewModel
+import com.example.e_library.data.TransactionViewModel
 import com.example.e_library.ui.theme.ELibraryTheme
 import com.example.e_library.ui.theme.screens.books.StaffAppTopBar
 import com.example.e_library.ui.theme.screens.books.StaffBottomAppBar
 
 @Composable
-fun ReturnBooksScreen(navController: NavHostController, clientId: String, bookId: String, staffId: String){
+fun ReturnBooksScreen(navController: NavHostController, clientId: String, bookId: String, staffId: String, borrowId: String){
     val context = LocalContext.current
-    val booksViewModel = BooksViewModel(navController, context)
+    val transactionViewModel = TransactionViewModel(navController, context)
     Box {
         Column {
             Box (
@@ -70,9 +70,10 @@ fun ReturnBooksScreen(navController: NavHostController, clientId: String, bookId
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
-                        booksViewModel.returnBook(
+                        transactionViewModel.returnBook(
                             clientId,
-                            bookId
+                            bookId,
+                            borrowId
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -108,6 +109,6 @@ fun ReturnBooksScreen(navController: NavHostController, clientId: String, bookId
 @Composable
 fun ReturnBooksScreenPreview(){
     ELibraryTheme {
-        ReturnBooksScreen(navController = rememberNavController(), clientId = "", bookId = "", staffId = "")
+        ReturnBooksScreen(navController = rememberNavController(), clientId = "", bookId = "", staffId = "", borrowId = "")
     }
 }

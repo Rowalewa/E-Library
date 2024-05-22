@@ -15,8 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MailOutline
@@ -69,7 +69,7 @@ import com.example.e_library.navigation.ROUTE_PRIVACY_POLICY_CLIENT
 import com.example.e_library.navigation.ROUTE_STAFF_CONTACT_AS_CLIENT
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_ALL_BOOKS_CLIENT
-import com.example.e_library.navigation.ROUTE_VIEW_BORROWED_BOOKS
+import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_BORROWS
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_INFO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -175,7 +175,7 @@ fun BorrowHomeScreen(navController: NavHostController, clientId: String){
                     )
                     Button(
                         onClick = {
-                            navController.navigate("$ROUTE_VIEW_BORROWED_BOOKS/$clientId")
+                            navController.navigate("$ROUTE_VIEW_CLIENT_BORROWS/$clientId")
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
@@ -292,7 +292,7 @@ fun ClientAppTopBar(navController: NavController, clientId: String){
             }
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription ="Back",
                     tint = Color.Magenta
                 )
@@ -369,7 +369,7 @@ fun ClientBottomAppBar(navController: NavController, clientId: String){
             Spacer(modifier = Modifier.width(40.dp))
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
-                    Icons.Filled.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                 )
             }

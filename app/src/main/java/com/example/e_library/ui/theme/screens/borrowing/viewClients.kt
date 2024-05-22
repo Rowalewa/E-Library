@@ -50,7 +50,7 @@ import com.example.e_library.data.AuthViewModel
 import com.example.e_library.data.BooksViewModel
 import com.example.e_library.models.Clients
 import com.example.e_library.navigation.ROUTE_VIEW_BOOKS
-import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_BORROWS
+import com.example.e_library.navigation.ROUTE_VIEW_STAFF_BORROWS
 import com.example.e_library.ui.theme.screens.books.StaffAppTopBar
 import com.example.e_library.ui.theme.screens.books.StaffBottomAppBar
 
@@ -296,7 +296,7 @@ fun ClientInstance(
             Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
-                    navController.navigate("$ROUTE_VIEW_CLIENT_BORROWS/$clientId/$staffId")
+                    navController.navigate("$ROUTE_VIEW_STAFF_BORROWS/$clientId/$staffId")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -44,6 +46,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
 import com.example.e_library.data.BooksViewModel
 import com.example.e_library.models.Books
+import com.example.e_library.navigation.ROUTE_BORROW_BOOKS_CLIENT
 import com.example.e_library.ui.theme.screens.borrowing.ClientAppTopBar
 import com.example.e_library.ui.theme.screens.borrowing.ClientBottomAppBar
 
@@ -170,6 +173,7 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                     bookSynopsis: String,
                     bookImageUrl: String,
                     bookQuantity: Int,
+                    bookId: String
                 ) {
 
                     Column(modifier = Modifier
@@ -261,6 +265,20 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                                 text = "Book Synopsis: $bookSynopsis",
                                 color = Color.Black
                             )
+                            Button(
+                                onClick = { navController.navigate("$ROUTE_BORROW_BOOKS_CLIENT/$bookId/$clientId") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 0.dp,
+                                        top = 0.dp,
+                                        bottom = 0.dp
+                                    ),
+                                colors = ButtonDefaults.buttonColors(Color.Red)
+                            ) {
+                                Text(text = "Borrow")
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(150.dp))
@@ -304,6 +322,7 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                             bookSynopsis = it.bookSynopsis,
                             bookImageUrl = it.bookImageUrl,
                             bookQuantity = it.bookQuantity,
+                            bookId = it.bookId
                         )
                     }
                 }

@@ -22,15 +22,17 @@ import com.example.e_library.ui.theme.screens.books.BooksHomeScreen
 import com.example.e_library.ui.theme.screens.books.EditBooksScreen
 import com.example.e_library.ui.theme.screens.books.ViewAllBooksScreen
 import com.example.e_library.ui.theme.screens.books.ViewBooksScreen
-import com.example.e_library.ui.theme.screens.borrowing.BorrowBooksScreen
+import com.example.e_library.ui.theme.screens.borrowing.BorrowBooksClientScreen
+import com.example.e_library.ui.theme.screens.borrowing.BorrowBooksStaffScreen
 import com.example.e_library.ui.theme.screens.borrowing.BorrowHomeScreen
+import com.example.e_library.ui.theme.screens.borrowing.ViewClientBorrowedBooks
+import com.example.e_library.ui.theme.screens.borrowing.ViewStaffBorrowedBooks
 import com.example.e_library.ui.theme.screens.borrowing.ViewClientsScreen
 import com.example.e_library.ui.theme.screens.clients.ClientHomeScreen
 import com.example.e_library.ui.theme.screens.clients.ClientLogInScreen
 import com.example.e_library.ui.theme.screens.clients.ClientRegisterScreen
 import com.example.e_library.ui.theme.screens.clients.EditClientInfo
 import com.example.e_library.ui.theme.screens.clients.ViewAllBooksClient
-import com.example.e_library.ui.theme.screens.clients.ViewBorrowedBooks
 import com.example.e_library.ui.theme.screens.clients.ViewClientInfo
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsAdmin
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsClient
@@ -51,7 +53,6 @@ import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenC
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenGuest
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenStaff
 import com.example.e_library.ui.theme.screens.returning.ReturnBooksScreen
-import com.example.e_library.ui.theme.screens.returning.ViewClientBorrowedBooks
 import com.example.e_library.ui.theme.screens.staff.EditStaffInfo
 import com.example.e_library.ui.theme.screens.staff.StaffHomeScreen
 import com.example.e_library.ui.theme.screens.staff.StaffLogInScreen
@@ -131,12 +132,19 @@ fun AppNavHost(modifier: Modifier = Modifier,
                 passedData.arguments?.getString("clientId")!!
             )  // need for edit
         }
-        composable("$ROUTE_BORROW_BOOKS/{clientId}/{bookId}/{staffId}"){ passedData ->
-            BorrowBooksScreen(
+        composable("$ROUTE_BORROW_BOOKS_STAFF/{clientId}/{bookId}/{staffId}"){ passedData ->
+            BorrowBooksStaffScreen(
                 navController,
                 passedData.arguments?.getString("clientId")!!,
                 passedData.arguments?.getString("bookId")!!,
                 passedData.arguments?.getString("staffId")!!
+            )
+        }
+        composable("$ROUTE_BORROW_BOOKS_CLIENT/{bookId}/{clientId}"){ passedData ->
+            BorrowBooksClientScreen(
+                navController,
+                passedData.arguments?.getString("bookId")!!,
+                passedData.arguments?.getString("clientId")!!,
             )
         }
 
@@ -164,24 +172,28 @@ fun AppNavHost(modifier: Modifier = Modifier,
         composable("$ROUTE_EDIT_CLIENT_INFO/{clientId}"){ passedData->
             EditClientInfo(navController, passedData.arguments?.getString("clientId")!!)
         }
-        composable("$ROUTE_VIEW_BORROWED_BOOKS/{clientId}"){passedData ->
-            ViewBorrowedBooks(navController, passedData.arguments?.getString("clientId")!!)
+        composable("$ROUTE_VIEW_STAFF_BORROWS/{clientId}/{staffId}"){passedData ->
+            ViewStaffBorrowedBooks(
+                navController,
+                passedData.arguments?.getString("clientId")!!,
+                passedData.arguments?.getString("staffId")!!
+            )
         }
         composable(ROUTE_HOME){
             HomeScreen(navController)
         }
-        composable("$ROUTE_RETURN_BOOKS/{clientId}/{bookId}/{staffId}"){passedData ->
+        composable("$ROUTE_RETURN_BOOKS/{clientId}/{bookId}/{staffId}/{borrowId}"){passedData ->
             ReturnBooksScreen(navController,
                 passedData.arguments?.getString("clientId")!!,
                 passedData.arguments?.getString("bookId")!!,
-                passedData.arguments?.getString("staffId")!!
+                passedData.arguments?.getString("staffId")!!,
+                passedData.arguments?.getString("borrowId")!!
             )  //need for edit
         }
-        composable("$ROUTE_VIEW_CLIENT_BORROWS/{clientId}/{staffId}"){passedData->
+        composable("$ROUTE_VIEW_CLIENT_BORROWS/{clientId}"){passedData->
             ViewClientBorrowedBooks(
                 navController,
-                passedData.arguments?.getString("clientId")!!,
-                passedData.arguments?.getString("staffId")!!
+                passedData.arguments?.getString("clientId")!!
             )
         }
         composable(ROUTE_STAFF_HOME){

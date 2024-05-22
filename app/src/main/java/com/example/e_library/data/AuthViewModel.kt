@@ -1163,7 +1163,7 @@ class AuthViewModel (
         val ref = FirebaseDatabase.getInstance().getReference().child("Staff")
 
         progress.show()
-        ref.addValueEventListener(object : ValueEventListener {
+        ref.orderByChild("staffStatus").equalTo("Verified").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 progress.dismiss()
                 mStaff.clear()

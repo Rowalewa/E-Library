@@ -12,6 +12,9 @@ class BorrowingBook {
     var bookImageUrl: String = ""
     var borrowDate: String = ""
     var returnDate: String = ""
+    var borrowMeans: String = ""
+    var borrowStatus: String = ""
+    var borrowId: String = ""
 
     constructor(
         clientId: String,
@@ -24,7 +27,10 @@ class BorrowingBook {
         bookSynopsis: String,
         bookImageUrl: String,
         borrowDate: String,
-        returnDate: String
+        returnDate: String,
+        borrowMeans: String,
+        borrowStatus: String,
+        borrowId: String
     ) {
         this.clientId = clientId
         this.bookId = bookId
@@ -37,6 +43,9 @@ class BorrowingBook {
         this.bookImageUrl = bookImageUrl
         this.borrowDate = borrowDate
         this.returnDate = returnDate
+        this.borrowMeans = borrowMeans
+        this.borrowStatus = borrowStatus
+        this.borrowId = borrowId
     }
 
     constructor()

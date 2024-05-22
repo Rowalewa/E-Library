@@ -1,5 +1,6 @@
-package com.example.e_library.ui.theme.screens.clients
+package com.example.e_library.ui.theme.screens.borrowing
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,19 +35,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
-import com.example.e_library.data.BooksViewModel
+import com.example.e_library.data.TransactionViewModel
 import com.example.e_library.models.BorrowingBook
-import com.example.e_library.ui.theme.screens.borrowing.ClientAppTopBar
-import com.example.e_library.ui.theme.screens.borrowing.ClientBottomAppBar
+import com.example.e_library.navigation.ROUTE_RETURN_BOOKS
+import com.example.e_library.ui.theme.screens.books.StaffAppTopBar
+import com.example.e_library.ui.theme.screens.books.StaffBottomAppBar
 
 @Composable
-fun ViewBorrowedBooks(navController: NavHostController, clientId: String){
+fun ViewStaffBorrowedBooks(navController: NavHostController, clientId: String, staffId: String){
     val context = LocalContext.current
-    val booksViewModel = remember { BooksViewModel(navController, context) }
+    val transactionViewModel = remember { TransactionViewModel(navController, context) }
     var borrowedBooks by remember { mutableStateOf<List<BorrowingBook>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        booksViewModel.getBorrowedBooksForClient(clientId) { books ->
+        transactionViewModel.getBorrowedBooksForClient(clientId) { books ->
             borrowedBooks = books
         }
     }
@@ -61,7 +65,7 @@ fun ViewBorrowedBooks(navController: NavHostController, clientId: String){
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
             ){
-                ClientAppTopBar(navController, clientId)
+                StaffAppTopBar(navController, staffId)
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -69,7 +73,7 @@ fun ViewBorrowedBooks(navController: NavHostController, clientId: String){
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
                     items(borrowedBooks) { book ->
-                        BookItems(
+                        BookItemsStaff(
                             bookId = book.bookId,
                             bookTitle = book.bookTitle,
                             bookAuthor = book.bookAuthor,
@@ -79,7 +83,13 @@ fun ViewBorrowedBooks(navController: NavHostController, clientId: String){
                             bookSynopsis = book.bookSynopsis,
                             bookImageUrl = book.bookImageUrl,
                             borrowDate = book.borrowDate,
-                            returnDate = book.returnDate
+                            returnDate = book.returnDate,
+                            borrowMeans = book.borrowMeans,
+                            borrowStatus = book.borrowStatus,
+                            navController,
+                            clientId,
+                            staffId,
+                            borrowId = book.borrowId
                         )
                     }
                 }
@@ -89,13 +99,13 @@ fun ViewBorrowedBooks(navController: NavHostController, clientId: String){
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
         ) {
-            ClientBottomAppBar(navController, clientId)
+            StaffBottomAppBar(navController, staffId)
         }
     }
 }
 
 @Composable
-fun BookItems(
+fun BookItemsStaff(
     bookId: String,
     bookTitle: String,
     bookAuthor: String,
@@ -105,8 +115,15 @@ fun BookItems(
     bookSynopsis: String,
     bookImageUrl: String,
     borrowDate: String,
-    returnDate: String
+    returnDate: String,
+    borrowMeans: String,
+    borrowStatus: String,
+    navController: NavHostController,
+    clientId: String,
+    staffId: String,
+    borrowId: String
 ) {
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(
@@ -169,6 +186,33 @@ fun BookItems(
                 text = "Book Return Date: $returnDate",
                 color = Color.Black
             )
+            Text(
+                text = "Borrow Means: $borrowMeans",
+                color = Color.Black
+            )
+            Text(
+                text = "Borrow Status: $borrowStatus",
+                color = Color.Black
+            )
+            Button(onClick = {
+                navController.navigate("$ROUTE_RETURN_BOOKS/$clientId/$bookId/$staffId/$borrowId")
+                Log.d("Firebase", "Borrow Id is: $borrowId")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = 5.dp,
+                        bottom = 5.dp
+                    ),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
+            ) {
+                Text(
+                    text = "Return"
+                )
+
+            }
         }
     }
     Spacer(modifier = Modifier.height(150.dp))

@@ -1,5 +1,7 @@
-package com.example.e_library.ui.theme.screens.returning
+package com.example.e_library.ui.theme.screens.borrowing
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,24 +33,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
-import com.example.e_library.data.BooksViewModel
+import com.example.e_library.data.TransactionViewModel
 import com.example.e_library.models.BorrowingBook
-import com.example.e_library.navigation.ROUTE_RETURN_BOOKS
-import com.example.e_library.ui.theme.screens.books.StaffAppTopBar
-import com.example.e_library.ui.theme.screens.books.StaffBottomAppBar
 
 @Composable
-fun ViewClientBorrowedBooks(navController: NavHostController, clientId: String, staffId: String){
+fun ViewClientBorrowedBooks(navController: NavHostController, clientId: String){
     val context = LocalContext.current
-    val booksViewModel = remember { BooksViewModel(navController, context) }
+    val transactionViewModel = remember { TransactionViewModel(navController, context) }
     var borrowedBooks by remember { mutableStateOf<List<BorrowingBook>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        booksViewModel.getBorrowedBooksForClient(clientId) { books ->
+        transactionViewModel.getBorrowedBooksForClient(clientId) { books ->
             borrowedBooks = books
         }
     }
@@ -65,7 +63,7 @@ fun ViewClientBorrowedBooks(navController: NavHostController, clientId: String, 
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
             ){
-                StaffAppTopBar(navController, staffId)
+                ClientAppTopBar(navController, clientId)
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -73,21 +71,25 @@ fun ViewClientBorrowedBooks(navController: NavHostController, clientId: String, 
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
                     items(borrowedBooks) { book ->
-                        BookItems(
-                            bookId = book.bookId,
-                            bookTitle = book.bookTitle,
-                            bookAuthor = book.bookAuthor,
-                            bookISBNNumber = book.bookISBNNumber,
-                            bookGenre = book.bookGenre,
-                            bookPublisher = book.bookPublisher,
-                            bookSynopsis = book.bookSynopsis,
-                            bookImageUrl = book.bookImageUrl,
-                            borrowDate = book.borrowDate,
-                            returnDate = book.returnDate,
-                            navController,
-                            clientId,
-                            staffId
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            BookItems(
+                                bookId = book.bookId,
+                                bookTitle = book.bookTitle,
+                                bookAuthor = book.bookAuthor,
+                                bookISBNNumber = book.bookISBNNumber,
+                                bookGenre = book.bookGenre,
+                                bookPublisher = book.bookPublisher,
+                                bookSynopsis = book.bookSynopsis,
+                                bookImageUrl = book.bookImageUrl,
+                                borrowDate = book.borrowDate,
+                                returnDate = book.returnDate,
+                                borrowMeans = book.borrowMeans,
+                                borrowStatus = book.borrowStatus,
+                                navController,
+                                clientId,
+                                borrowId = book.borrowId
+                            )
+                        }
                     }
                 }
             }
@@ -96,11 +98,12 @@ fun ViewClientBorrowedBooks(navController: NavHostController, clientId: String, 
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
         ) {
-            StaffBottomAppBar(navController, staffId)
+            ClientBottomAppBar(navController, clientId)
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BookItems(
     bookId: String,
@@ -113,10 +116,13 @@ fun BookItems(
     bookImageUrl: String,
     borrowDate: String,
     returnDate: String,
-    navController: NavController,
+    borrowMeans: String,
+    borrowStatus: String,
+    navController: NavHostController,
     clientId: String,
-    staffId: String
+    borrowId: String
 ) {
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(
@@ -179,20 +185,38 @@ fun BookItems(
                 text = "Book Return Date: $returnDate",
                 color = Color.Black
             )
-            Button(onClick = {
-                navController.navigate("$ROUTE_RETURN_BOOKS/$clientId/$bookId/$staffId")
-            },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 20.dp,
-                        end = 0.dp,
-                        top = 0.dp,
-                        bottom = 0.dp
-                    ),
-                colors = ButtonDefaults.buttonColors(Color.Red)
-            ) {
-                Text(text = "Return")
+            Text(
+                text = "Borrow Means: $borrowMeans",
+                color = Color.Black
+            )
+            Text(
+                text = "Borrow Status: $borrowStatus",
+                color = Color.Black
+            )
+            if (borrowStatus != "Delivered") {
+                Button(
+                    onClick = {
+                        val transactionViewModel = TransactionViewModel(navController, context)
+                        transactionViewModel.deliveryApproval(
+                            clientId,
+                            borrowId
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = 10.dp,
+                            end = 10.dp,
+                            top = 5.dp,
+                            bottom = 5.dp
+                        ),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                ) {
+                    Text(
+                        text = "Delivery Approved"
+                    )
+
+                }
             }
         }
     }

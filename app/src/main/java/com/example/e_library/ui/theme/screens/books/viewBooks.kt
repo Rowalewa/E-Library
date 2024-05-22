@@ -47,7 +47,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
 import com.example.e_library.data.BooksViewModel
 import com.example.e_library.models.Books
-import com.example.e_library.navigation.ROUTE_BORROW_BOOKS
+import com.example.e_library.navigation.ROUTE_BORROW_BOOKS_STAFF
 import com.example.e_library.navigation.ROUTE_EDIT_BOOKS
 
 @Composable
@@ -307,7 +307,7 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                                     }
                                 }
                                 Button(
-                                    onClick = { navController.navigate("$ROUTE_BORROW_BOOKS/$bookId/$clientId/$staffId") },
+                                    onClick = { navController.navigate("$ROUTE_BORROW_BOOKS_STAFF/$bookId/$clientId/$staffId") },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(
