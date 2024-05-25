@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.navigation.NavHostController
 import com.example.e_library.models.Books
 import com.example.e_library.models.BorrowingBook
+import com.example.e_library.models.CartOrder
 import com.example.e_library.models.Clients
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_BORROWS
 import com.google.firebase.database.DataSnapshot
@@ -565,6 +566,30 @@ class TransactionViewModel(
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(context, "Failed to fetch client status", Toast.LENGTH_SHORT).show()
             }
+        })
+    }
+
+    fun pickUpApproval(
+        clientId: String,
+        cartOrderId: String
+    ){
+        val cartOrderRef = FirebaseDatabase.getInstance().getReference().child("CartOrders").child(clientId).child(cartOrderId)
+        cartOrderRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val cartOrdersSnapshot = snapshot.getValue(CartOrder::class.java)
+                if (cartOrdersSnapshot == null){
+                    Toast.makeText(context, "Failed to fetch cart order; null", Toast.LENGTH_SHORT).show()
+                }else{
+                    val newCartOrderStatus = "Checked Out"
+                    cartOrderRef.child("cartOrderStatus").setValue(newCartOrderStatus)
+                    Log.d("Firebase", "Cart Order Status is: $newCartOrderStatus")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Failed to fetch cart order status", Toast.LENGTH_SHORT).show()
+            }
+
         })
     }
 

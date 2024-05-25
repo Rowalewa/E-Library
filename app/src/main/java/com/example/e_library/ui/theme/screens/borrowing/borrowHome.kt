@@ -69,6 +69,7 @@ import com.example.e_library.navigation.ROUTE_PRIVACY_POLICY_CLIENT
 import com.example.e_library.navigation.ROUTE_STAFF_CONTACT_AS_CLIENT
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_ALL_BOOKS_CLIENT
+import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_BORROWS
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_INFO
 import com.google.firebase.auth.FirebaseAuth
@@ -183,6 +184,14 @@ fun BorrowHomeScreen(navController: NavHostController, clientId: String){
                         )
                     ) {
                         Text(text = "View My Borrowed Books")
+                    }
+
+                    Button(onClick = { navController.navigate("$ROUTE_VIEW_CART_CLIENT/$clientId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "View Cart"
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))

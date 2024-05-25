@@ -207,35 +207,35 @@ fun StaffInstance(
                     .clip(shape = CircleShape)
             )
             Text(
-                text = "Client Name: $fullName",
+                text = "Staff Name: $fullName",
                 color = Color.Black
             )
             Text(
-                text = "Client Gender: $gender",
+                text = "Staff Gender: $gender",
                 color = Color.Black
             )
             Text(
-                text = "Client Marital Status: $maritalStatus",
+                text = "Staff Marital Status: $maritalStatus",
                 color = Color.Black
             )
             Text(
-                text = "Client Phone Number: $phoneNumber",
+                text = "Staff Phone Number: $phoneNumber",
                 color = Color.Black
             )
             Text(
-                text = "Client Date of Birth: $dateOfBirth",
+                text = "Staff Date of Birth: $dateOfBirth",
                 color = Color.Black
             )
             Text(
-                text = "Client Email: $email",
+                text = "Staff Email: $email",
                 color = Color.Black
             )
             Text(
-                text = "Client Status: $staffStatus",
+                text = "Staff Status: $staffStatus",
                 color = Color.Black
             )
             Text(
-                text = "Client Id: $staffId",
+                text = "Staff Id: $staffId",
                 color = Color.Black
             )
             Row(

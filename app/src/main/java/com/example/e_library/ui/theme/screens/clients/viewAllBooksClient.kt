@@ -46,6 +46,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
 import com.example.e_library.data.BooksViewModel
 import com.example.e_library.models.Books
+import com.example.e_library.navigation.ROUTE_ADD_CART
 import com.example.e_library.navigation.ROUTE_BORROW_BOOKS_CLIENT
 import com.example.e_library.ui.theme.screens.borrowing.ClientAppTopBar
 import com.example.e_library.ui.theme.screens.borrowing.ClientBottomAppBar
@@ -278,6 +279,21 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                                 colors = ButtonDefaults.buttonColors(Color.Red)
                             ) {
                                 Text(text = "Borrow")
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Button(
+                                onClick = { navController.navigate("$ROUTE_ADD_CART/$clientId/$bookId") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 0.dp,
+                                        top = 0.dp,
+                                        bottom = 0.dp
+                                    ),
+                                colors = ButtonDefaults.buttonColors(Color.Blue)
+                            ) {
+                                Text(text = "Add to Cart")
                             }
                         }
                     }

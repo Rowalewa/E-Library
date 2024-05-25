@@ -431,8 +431,8 @@ fun ImagePicker(
             }
             Button(onClick = {
                 //-----------WRITE THE UPLOAD LOGIC HERE---------------//
-                val productRepository = AuthViewModel(navController,context)
-                productRepository.adminSignup(
+                val authRepository = AuthViewModel(navController,context)
+                authRepository.adminSignup(
                     fullName,
                     gender,
                     maritalStatus,
@@ -471,10 +471,10 @@ fun ImagePicker(
 @Preview(
     showSystemUi = true,
     showBackground = true,
-    name = "Client Register Screen Preview"
+    name = "Admin Register Screen Preview"
 )
 @Composable
-fun ClientRegisterScreenPreview(){
+fun AdminRegisterScreenPreview(){
     ELibraryTheme {
         AdminRegisterScreen(navController = rememberNavController())
     }

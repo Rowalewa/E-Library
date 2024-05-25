@@ -64,92 +64,13 @@ fun ContactStaffAsStaff(navController: NavHostController, staffId: String){
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            val context = LocalContext.current
-            val staffRepository = AuthViewModel(navController, context)
-            val emptyStaffState = remember { mutableStateOf(Staff("", "", "", "", "", "", "", "", "", "")) }
-            val emptyStaffListState = remember { mutableStateListOf<Staff>() }
-
-            val staff = staffRepository.viewStaff(emptyStaffState, emptyStaffListState)
-
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Box (
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ){
                 StaffAppTopBar(navController, staffId)
-                Text(
-                    text = "Staff",
-                    fontSize = 30.sp,
-                    fontFamily = FontFamily.Serif,
-                    color = Color.Red
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-                var searchText by remember { mutableStateOf("") }
-                Row(
-                    modifier = Modifier
-                        .border(
-                            width = Dp.Hairline,
-                            shape = CutCornerShape(10.dp),
-                            color = Color.Black
-                        )
-                        .background(color = Color.Cyan, shape = CutCornerShape(10.dp)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = searchText,
-                        onValueChange = { searchText = it },
-                        label = { Text("Search") },
-                        modifier = Modifier.padding(
-                            start = 10.dp,
-                            end = 0.dp,
-                            top = 2.dp,
-                            bottom = 5.dp
-                        ),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Red,
-                            unfocusedContainerColor = Color.White,
-                            focusedLabelColor = Color.Black ,
-                            unfocusedLabelColor = Color.DarkGray,
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Magenta
-                        )
-                    )
-                    IconButton(onClick = { searchText = "" }) {
-                        Icon(
-                            Icons.Filled.Clear,
-                            contentDescription = "Clear Search",
-                            tint = Color.Red
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                LazyRow(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(
-                        start = 0.dp,
-                        end = 0.dp,
-                        bottom = 20.dp,
-                        top = 0.dp
-                    )
-                ) {
-                    val filteredStaff = staff.filter {
-                        it.fullName.contains(searchText, ignoreCase = true) ||
-                                it.email.contains(searchText, ignoreCase = true)
-                    }
-                    items(filteredStaff) {
-                        StaffInstanceAsStaff(
-                            fullName = it.fullName,
-                            phoneNumber = it.phoneNumber,
-                            email = it.email,
-                            staffProfilePictureUrl = it.staffProfilePictureUrl,
-                            //navController = navController,
-                            //staffRepository = staffRepository
-                        )
-                    }
-                }
             }
+            ContactStaff(navController)
         }
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -159,8 +80,96 @@ fun ContactStaffAsStaff(navController: NavHostController, staffId: String){
         }
     }
 }
+
 @Composable
-fun StaffInstanceAsStaff(
+fun ContactStaff(navController: NavHostController){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val context = LocalContext.current
+        val staffRepository = AuthViewModel(navController, context)
+        val emptyStaffState = remember { mutableStateOf(Staff("", "", "", "", "", "", "", "", "", "")) }
+        val emptyStaffListState = remember { mutableStateListOf<Staff>() }
+
+        val staff = staffRepository.viewStaff(emptyStaffState, emptyStaffListState)
+
+        Text(
+            text = "Staff",
+            fontSize = 30.sp,
+            fontFamily = FontFamily.Serif,
+            color = Color.Red
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+        var searchText by remember { mutableStateOf("") }
+        Row(
+            modifier = Modifier
+                .border(
+                    width = Dp.Hairline,
+                    shape = CutCornerShape(10.dp),
+                    color = Color.Black
+                )
+                .background(color = Color.Cyan, shape = CutCornerShape(10.dp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                label = { Text("Search") },
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    end = 0.dp,
+                    top = 2.dp,
+                    bottom = 5.dp
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Red,
+                    unfocusedContainerColor = Color.White,
+                    focusedLabelColor = Color.Black ,
+                    unfocusedLabelColor = Color.DarkGray,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Magenta
+                )
+            )
+            IconButton(onClick = { searchText = "" }) {
+                Icon(
+                    Icons.Filled.Clear,
+                    contentDescription = "Clear Search",
+                    tint = Color.Red
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(
+                start = 0.dp,
+                end = 0.dp,
+                bottom = 20.dp,
+                top = 0.dp
+            )
+        ) {
+            val filteredStaff = staff.filter {
+                it.fullName.contains(searchText, ignoreCase = true) ||
+                        it.email.contains(searchText, ignoreCase = true)
+            }
+            items(filteredStaff) {
+                StaffContactInstance(
+                    fullName = it.fullName,
+                    phoneNumber = it.phoneNumber,
+                    email = it.email,
+                    staffProfilePictureUrl = it.staffProfilePictureUrl,
+                    //navController = navController,
+                    //staffRepository = staffRepository
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StaffContactInstance(
     fullName: String,
     phoneNumber: String,
     email: String,

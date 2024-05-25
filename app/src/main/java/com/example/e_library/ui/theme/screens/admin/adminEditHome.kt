@@ -61,6 +61,7 @@ import com.example.e_library.data.AuthViewModel
 import com.example.e_library.models.Admin
 import com.example.e_library.navigation.ROUTE_ABOUT_SCREEN_ADMIN
 import com.example.e_library.navigation.ROUTE_ADMIN_CLIENT_EDIT
+import com.example.e_library.navigation.ROUTE_ADMIN_DELIVERY_PERSONNEL_EDIT
 import com.example.e_library.navigation.ROUTE_ADMIN_EDIT_HOME
 import com.example.e_library.navigation.ROUTE_ADMIN_FEEDBACK
 import com.example.e_library.navigation.ROUTE_ADMIN_STAFF_EDIT
@@ -199,6 +200,24 @@ fun AdminEditHome(navController: NavController, adminId: String){
                         Text(text = "Edit Client")
                     }
                 }
+                Spacer(modifier = Modifier.height(15.dp))
+                Card(
+                    colors = CardDefaults.cardColors(Color.Yellow)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.delivery_icon),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    )
+                    Button(
+                        onClick = { navController.navigate("$ROUTE_ADMIN_DELIVERY_PERSONNEL_EDIT/$adminId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "Edit Delivery Personnel")
+                    }
+                }
                 Spacer(modifier = Modifier.height(150.dp))
 
             }
@@ -218,8 +237,8 @@ fun AdminAppTopBar(navController: NavController, adminId: String){
     var expanded by remember {
         mutableStateOf(false)
     }
-    val staff = FirebaseAuth.getInstance().currentUser
-    val staffProfilePictureUrl = staff?.photoUrl?.toString()
+    val admin = FirebaseAuth.getInstance().currentUser
+    val adminProfilePictureUrl = admin?.photoUrl?.toString()
     TopAppBar(
         title = {
             Text(
@@ -261,7 +280,7 @@ fun AdminAppTopBar(navController: NavController, adminId: String){
             IconButton(
                 onClick = { expanded = true }
             ) {
-                staffProfilePictureUrl?.let {
+                adminProfilePictureUrl?.let {
                     Image(
                         painter = rememberAsyncImagePainter(it),
                         contentDescription = null,

@@ -4,7 +4,10 @@ package com.example.e_library.data
 
 import android.app.ProgressDialog
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
@@ -12,6 +15,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavController
 import com.example.e_library.models.Admin
 import com.example.e_library.models.Clients
+import com.example.e_library.models.DeliveryPersonnel
 import com.example.e_library.models.Staff
 import com.example.e_library.navigation.ROUTE_ADMIN_EDIT_HOME
 import com.example.e_library.navigation.ROUTE_ADMIN_LOGIN
@@ -21,6 +25,10 @@ import com.example.e_library.navigation.ROUTE_BORROW_HOME
 import com.example.e_library.navigation.ROUTE_CLIENT_HOME
 import com.example.e_library.navigation.ROUTE_CLIENT_LOGIN
 import com.example.e_library.navigation.ROUTE_CLIENT_REGISTER
+import com.example.e_library.navigation.ROUTE_DASHBOARD
+import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_HOME
+import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_LOGIN
+import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_REGISTER
 import com.example.e_library.navigation.ROUTE_HOME
 import com.example.e_library.navigation.ROUTE_STAFF_HOME
 import com.example.e_library.navigation.ROUTE_STAFF_LOGIN
@@ -49,6 +57,68 @@ class AuthViewModel (
         progressUpdate.setMessage("Please Wait...")
         progressDelete.setTitle("Deleting")
         progressDelete.setMessage("Please Wait...")
+    }
+
+    fun isInternetAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return when {
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val networkInfo = connectivityManager.activeNetworkInfo ?: return false
+            @Suppress("DEPRECATION")
+            return networkInfo.isConnected
+        }
+    }
+
+    fun getStartDestination(): String {
+        getUserId(context)
+        return when (getUserType(context)) {
+            "Client" -> "$ROUTE_BORROW_HOME/${getUserId(context)}"
+            "Admin" -> "$ROUTE_ADMIN_EDIT_HOME/${getUserId(context)}"
+            "Staff" -> "$ROUTE_BOOKS_HOME/${getUserId(context)}"
+            "DeliveryPersonnel" -> "$ROUTE_DELIVERY_PERSONNEL_HOME/${getUserId(context)}"
+            else -> ROUTE_DASHBOARD
+        }
+    }
+
+    private fun saveLoginState(context: Context, userId: String, userType: String) {
+        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("userId", userId)
+        editor.putString("userType", userType)
+        editor.putBoolean("isLoggedIn", true)
+        editor.apply()
+    }
+
+    fun checkLoginState(context: Context): Boolean {
+        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean("isLoggedIn", false)
+    }
+
+    fun getUserId(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("userId", null)
+    }
+
+    fun getUserType(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("userType", null)
+    }
+
+    private fun clearLoginState(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
+        navController.navigate(ROUTE_HOME)
     }
 
     fun adminSignup(
@@ -165,6 +235,7 @@ class AuthViewModel (
                     if (adminId != null) {
                         if (it.isSuccessful) {
                             progress.dismiss()
+                            saveLoginState(context, adminId, "Admin")
                             Toast.makeText(context, "Successfully logged in", Toast.LENGTH_LONG).show()
                             navController.navigate("$ROUTE_ADMIN_EDIT_HOME/$adminId")
                         } else {
@@ -205,6 +276,11 @@ class AuthViewModel (
     fun verifyStaff(staffId: String) {
         val staffRef = FirebaseDatabase.getInstance().getReference("Staff").child(staffId)
         staffRef.child("staffStatus").setValue("Verified")
+    }
+
+    fun verifyDeliveryPersonnel(deliveryPersonnelId: String) {
+        val deliveryPersonnelRef = FirebaseDatabase.getInstance().getReference("DeliveryPersonnel").child(deliveryPersonnelId)
+        deliveryPersonnelRef.child("accountStatus").setValue("Verified")
     }
 
     fun updateAdmin(
@@ -646,6 +722,7 @@ class AuthViewModel (
                     progress.dismiss()
                     if (clientId != null) {
                         if (it.isSuccessful) {
+                            saveLoginState(context, clientId, "Client")
                             Toast.makeText(context, "Successfully logged in", Toast.LENGTH_LONG)
                                 .show()
                             navController.navigate("$ROUTE_BORROW_HOME/$clientId")
@@ -906,6 +983,7 @@ class AuthViewModel (
                     progress.dismiss()
                     if (staffId != null && staffStatus == "Verified") {
                         if (it.isSuccessful) {
+                            saveLoginState(context, staffId, "Staff")
                             Toast.makeText(context, "Successfully logged in", Toast.LENGTH_LONG)
                                 .show()
                             navController.navigate("$ROUTE_BOOKS_HOME/$staffId")
@@ -1112,19 +1190,29 @@ class AuthViewModel (
 
     fun stafflogout(){
         mAuth.signOut()
-        navController.navigate(ROUTE_STAFF_HOME)
+        FirebaseAuth.getInstance().signOut()
+        clearLoginState(context)
         Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
     }
 
     fun clientlogout(){
         mAuth.signOut()
-        navController.navigate(ROUTE_CLIENT_HOME)
+        FirebaseAuth.getInstance().signOut()
+        clearLoginState(context)
         Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
     }
 
     fun adminLogout(){
         mAuth.signOut()
-        navController.navigate(ROUTE_HOME)
+        FirebaseAuth.getInstance().signOut()
+        clearLoginState(context)
+        Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
+    }
+
+    fun deliveryPersonnelLogout(){
+        mAuth.signOut()
+        FirebaseAuth.getInstance().signOut()
+        clearLoginState(context)
         Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
     }
 
@@ -1163,7 +1251,7 @@ class AuthViewModel (
         val ref = FirebaseDatabase.getInstance().getReference().child("Staff")
 
         progress.show()
-        ref.orderByChild("staffStatus").equalTo("Verified").addValueEventListener(object : ValueEventListener {
+        ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 progress.dismiss()
                 mStaff.clear()
@@ -1179,6 +1267,47 @@ class AuthViewModel (
             }
         })
         return mStaff
+    }
+
+    fun viewDeliveryPersonnel(
+        deliveryPersonnel: MutableState<DeliveryPersonnel>,
+        mDeliveryPersonnel: SnapshotStateList<DeliveryPersonnel>
+    ): SnapshotStateList<DeliveryPersonnel> {
+        val ref = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel")
+
+        progress.show()
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                progress.dismiss()
+                mDeliveryPersonnel.clear()
+                for (snap in snapshot.children) {
+                    val value = snap.getValue(DeliveryPersonnel::class.java)
+                    deliveryPersonnel.value = value!!
+                    mDeliveryPersonnel.add(value)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+            }
+        })
+        return mDeliveryPersonnel
+    }
+
+    fun deleteDeliveryPersonnel(deliveryPersonnelId: String) {
+        val delRef = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel/$deliveryPersonnelId")
+        progressDelete.show()
+        delRef.removeValue().addOnCompleteListener {task ->
+            if (task.isSuccessful) {
+                progressDelete.dismiss()
+                Log.d("Delete Delivery Personnel Account", "Delivery Personnel Account deleted")
+                Toast.makeText(context, "Delivery Personnel Account deleted", Toast.LENGTH_SHORT).show()
+            } else {
+                progressDelete.dismiss()
+                Log.e("Delete Delivery Personnel Account", "Error deleting Delivery Personnel Account", task.exception)
+                Toast.makeText(context, "Error deleting Delivery Personnel Account: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     fun deleteClient(clientId: String) {
@@ -1198,7 +1327,7 @@ class AuthViewModel (
     }
 
     fun deleteStaff(staffId: String) {
-        val delRef = FirebaseDatabase.getInstance().getReference().child("Client/$staffId")
+        val delRef = FirebaseDatabase.getInstance().getReference().child("Staff/$staffId")
         progressDelete.show()
         delRef.removeValue().addOnCompleteListener {task ->
             if (task.isSuccessful) {
@@ -1216,5 +1345,331 @@ class AuthViewModel (
     private fun isStrongPassword(pass: String): Boolean {
         val pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$".toRegex()
         return pattern.matches(pass)
+    }
+
+    fun deliveryPersonnelSignup(
+        fullName: String,
+        gender: String,
+        maritalStatus: String,
+        phoneNumber: String,
+        dateOfBirth: String,
+        accountStatus: String,
+        deliveryStatus: String,
+        vehicle: String,
+        email: String,
+        pass: String,
+        confpass: String,
+        deliveryPersonnelProfilePictureUrl: Uri?,
+    ) {
+        progress.show()
+        if (deliveryPersonnelProfilePictureUrl != null) {
+            if (fullName.isBlank() || gender.isBlank() || maritalStatus.isBlank() || phoneNumber.isBlank() || dateOfBirth.isBlank() || email.isBlank() || pass.isBlank() || confpass.isBlank()) {
+                progress.dismiss()
+                Toast.makeText(context, "Fill all the Fields Please \uD83D\uDE42", Toast.LENGTH_LONG).show()
+                return
+            } else if (pass != confpass) {
+                progress.dismiss()
+                Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                navController.navigate(ROUTE_STAFF_REGISTER)
+                return
+            } else if (phoneNumber.length != 10) {
+                progress.dismiss()
+                Toast.makeText(context, "Invalid Phone Number", Toast.LENGTH_LONG).show()
+                return
+            } else {
+                if (isStrongPassword(pass)) {
+                    mAuth.createUserWithEmailAndPassword(email, pass)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val deliveryPersonnelId = System.currentTimeMillis().toString()
+                                val storageRef = FirebaseStorage.getInstance().reference
+                                val profilePicRef = storageRef.child("delivery_personnel_profile_pictures/${deliveryPersonnelId}")
+                                profilePicRef.putFile(deliveryPersonnelProfilePictureUrl)
+                                    .addOnSuccessListener { _ ->
+                                        profilePicRef.downloadUrl.addOnSuccessListener { uri ->
+                                            // Once the image is uploaded, save the user data including the image URL
+                                            val deliveryPersonnelProfilePictureUrl = uri.toString()
+                                            val deliveryPersonnelData = DeliveryPersonnel(
+                                                fullName,
+                                                gender,
+                                                maritalStatus,
+                                                phoneNumber,
+                                                dateOfBirth,
+                                                accountStatus,
+                                                deliveryStatus,
+                                                vehicle,
+                                                deliveryPersonnelProfilePictureUrl,// Save the image URL in the user data
+                                                email,
+                                                pass,
+                                                deliveryPersonnelId
+                                            )
+                                            val regRef = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel").child(deliveryPersonnelId)
+                                            regRef.setValue(deliveryPersonnelData)
+                                                .addOnCompleteListener { dataTask ->
+                                                    if (dataTask.isSuccessful) {
+                                                        progress.dismiss()
+                                                        Toast.makeText(context, "Account Created Successfully, wait for verification", Toast.LENGTH_LONG).show()
+                                                        navController.navigate(ROUTE_DELIVERY_PERSONNEL_LOGIN)
+                                                    } else {
+                                                        progress.dismiss()
+                                                        Toast.makeText(context, "${dataTask.exception!!.message}", Toast.LENGTH_LONG).show()
+                                                        navController.navigate(
+                                                            ROUTE_DELIVERY_PERSONNEL_REGISTER)
+                                                    }
+                                                }
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        progress.dismiss()
+                                        Toast.makeText(context, "Failed to upload image: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                            } else {
+                                progress.dismiss()
+                                val errorMessage =
+                                    task.exception?.message ?: "Could not Register, Retry"
+                                if (errorMessage.contains("email address is already in use")) {
+                                    Toast.makeText(context, "Email address is already registered", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                                }
+                                navController.navigate(ROUTE_DELIVERY_PERSONNEL_REGISTER)
+                            }
+                        }
+                } else {
+                    Toast.makeText(context, "Your password strength is weak, pattern requires at least 8 characters including at least one uppercase letter, one lowercase letter, one digit, and one special character.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }else{
+            progress.dismiss()
+            Toast.makeText(context, "You are required to choose an image and fill in all the fields", Toast.LENGTH_LONG).show()
+            return
+        }
+    }
+
+    fun deliveryPersonnelLogin(
+        email: String,
+        pass: String
+    ){
+        progress.show()
+        if (email.isBlank() || pass.isBlank()){
+            progress.dismiss()
+            Toast.makeText(context, "Please fill in all the fields", Toast.LENGTH_LONG).show()
+        } else {
+            mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener {
+                getDeliveryPersonnelIdAndStatusByEmail(email) { deliveryPersonnelId, accountStatus ->
+                    if (deliveryPersonnelId != null && accountStatus == "Verified") {
+                        if (it.isSuccessful) {
+                            saveLoginState(context, deliveryPersonnelId, "DeliveryPersonnel")
+                            progress.dismiss()
+                            Toast.makeText(context, "Successfully logged in", Toast.LENGTH_LONG).show()
+                            navController.navigate("$ROUTE_DELIVERY_PERSONNEL_HOME/$deliveryPersonnelId")
+                        } else {
+                            progress.dismiss()
+                            Toast.makeText(context, "${it.exception!!.message}", Toast.LENGTH_LONG).show()
+                            navController.navigate(ROUTE_DELIVERY_PERSONNEL_LOGIN)
+                        }
+                    } else {
+                        if (accountStatus != "Verified") {
+                            progress.dismiss()
+                            Toast.makeText(context, "Account not verified", Toast.LENGTH_LONG).show()
+                        } else {
+                            progress.dismiss()
+                            Toast.makeText(context, "Delivery Personnel is null", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getDeliveryPersonnelIdAndStatusByEmail(email: String, callback: (String?, String?) -> Unit) {
+        val ref = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel")
+        ref.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        val deliveryPersonnelId = snap.key // Assuming the client ID is the key of the client node
+                        val accountStatus = snap.child("accountStatus").getValue(String::class.java)
+                        callback(deliveryPersonnelId, accountStatus)
+                        return
+                    }
+                }
+                callback(null, null) // Client ID not found
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("DeliveryPersonnel", "Error fetching Delivery Personnel ID: ${error.message}")
+                callback(null, null) // Handle the error by returning null
+            }
+        })
+    }
+
+    fun updateDeliveryPersonnel(
+        fullName: String,
+        gender: String,
+        maritalStatus: String,
+        phoneNumber: String,
+        dateOfBirth: String,
+        accountStatus: String,
+        deliveryStatus: String,
+        vehicle: String,
+        email: String,
+        pass: String,
+        confpass: String,
+        deliveryPersonnelId: String,
+        filePath: Uri?
+    ) {
+        progressUpdate.show()
+        val storageReference = FirebaseStorage.getInstance().getReference().child("DeliveryPersonnel/$deliveryPersonnelId")
+        val updateData = DeliveryPersonnel(
+            fullName,
+            gender,
+            maritalStatus,
+            phoneNumber,
+            dateOfBirth,
+            accountStatus,
+            deliveryStatus,
+            vehicle,
+            "",
+            email,
+            pass,
+            deliveryPersonnelId
+        )
+
+        // Update book details in Firebase Realtime Database
+        if (filePath != null) {
+            if (pass.isNotBlank()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.updatePassword(pass)?.addOnCompleteListener { passwordUpdateTask ->
+                    if (passwordUpdateTask.isSuccessful) {
+                        if (pass == confpass) {
+                            if (isStrongPassword(pass)) {
+                                val dbRef = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel/$deliveryPersonnelId")
+                                dbRef.setValue(updateData).addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // If an image file is provided, update the image in Firebase Storage
+                                        filePath.let { fileUri ->
+                                            storageReference.putFile(fileUri)
+                                                .addOnCompleteListener { storageTask ->
+                                                    if (storageTask.isSuccessful) {
+                                                        progressUpdate.dismiss()
+                                                        storageReference.downloadUrl.addOnSuccessListener { uri ->
+                                                            val imageUrl = uri.toString()
+                                                            updateData.deliveryPersonnelProfilePictureUrl = imageUrl
+                                                            dbRef.setValue(updateData) // Update the book entry with the image URL
+                                                        }
+                                                    } else {
+                                                        progressUpdate.dismiss()
+                                                        Toast.makeText(context, "Upload Failure", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                        }
+
+                                        // Show success message
+                                        progressUpdate.dismiss()
+                                        Toast.makeText(context, "Update successful", Toast.LENGTH_SHORT).show()
+                                        navController.popBackStack()
+                                    } else {
+                                        progressUpdate.dismiss()
+                                        // Handle database update error
+                                        Toast.makeText(context, "ERROR: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else {
+                                progressUpdate.dismiss()
+                                Toast.makeText(context, "Your password strength is weak, pattern requires at least 8 characters including at least one uppercase letter, one lowercase letter, one digit, and one special character.", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        progressUpdate.dismiss()
+                        Toast.makeText(context, "Passwords Update task failure", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }else{
+                progressUpdate.dismiss()
+                Toast.makeText(context, "You cannot set an empty password", Toast.LENGTH_LONG).show()
+                return
+            }
+        } else {
+            progressUpdate.show()
+            if (pass.isNotBlank()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.updatePassword(pass)?.addOnCompleteListener { passwordUpdateTask ->
+                    if (passwordUpdateTask.isSuccessful) {
+                        if (pass == confpass) {
+                            val dbRef = FirebaseDatabase.getInstance().getReference()
+                                .child("DeliveryPersonnel/$deliveryPersonnelId")
+                            dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val deliveryPersonnel = snapshot.getValue(DeliveryPersonnel::class.java)
+                                    val existingImageUrl = deliveryPersonnel?.deliveryPersonnelProfilePictureUrl ?: ""
+
+                                    val updateData = DeliveryPersonnel(
+                                        fullName,
+                                        gender,
+                                        maritalStatus,
+                                        phoneNumber,
+                                        dateOfBirth,
+                                        accountStatus,
+                                        deliveryStatus,
+                                        vehicle,
+                                        existingImageUrl,
+                                        email,
+                                        pass,
+                                        deliveryPersonnelId
+                                    )
+
+                                    dbRef.setValue(updateData).addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            // Show success message
+                                            progressUpdate.dismiss()
+                                            Toast.makeText(context, "Update successful", Toast.LENGTH_SHORT).show()
+                                            navController.popBackStack()
+                                        } else {
+                                            // Handle database update error
+                                            progressUpdate.dismiss()
+                                            Toast.makeText(context, "ERROR: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    // Handle database error
+                                    progressUpdate.dismiss()
+                                    Toast.makeText(context, "ERROR: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Success with Image Retained", Toast.LENGTH_LONG).show()
+                        } else {
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        progressUpdate.dismiss()
+                        Toast.makeText(context, "Password Update Task Failure", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }else{
+                progressUpdate.dismiss()
+                Toast.makeText(context, "You cannot set an empty password", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+    }
+
+
+    fun deliveryStatusAvailable(deliveryPersonnelId: String) {
+        val deliveryPersonnelRef = FirebaseDatabase.getInstance().getReference("DeliveryPersonnel").child(deliveryPersonnelId)
+        deliveryPersonnelRef.child("deliveryStatus").setValue("Available")
+    }
+
+    fun deliveryStatusUnavailable(deliveryPersonnelId: String) {
+        val deliveryPersonnelRef = FirebaseDatabase.getInstance().getReference("DeliveryPersonnel").child(deliveryPersonnelId)
+        deliveryPersonnelRef.child("deliveryStatus").setValue("Unavailable")
     }
 }

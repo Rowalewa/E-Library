@@ -177,4 +177,57 @@ class FeedbackViewModel(
             Toast.makeText(context, "User not found", Toast.LENGTH_LONG).show()
         }
     }
+
+    fun saveFeedbackToFirebaseDeliveryPersonnel(
+        feedbackName: String,
+        feedbackEmailAddress: String,
+        feedbackText: String
+    ) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val isEmailSimilar = feedbackEmailAddress == currentUser.email
+            val isEmailFilled = feedbackEmailAddress.isNotBlank()
+
+            if (isEmailFilled && !isEmailSimilar) {
+                Toast.makeText(context, "Email address does not match current user", Toast.LENGTH_LONG).show()
+                return
+            }else {
+                val feedbackData = Feedback(
+                    feedbackName,
+                    feedbackEmailAddress,
+                    feedbackText
+                )
+                val feedbackId = System.currentTimeMillis().toString()
+                val feedbackRef = FirebaseDatabase.getInstance().getReference().child("FeedbackDeliveryPersonnel/$feedbackId/$feedbackName")
+                progress.show()
+                if (feedbackName.isNotBlank() || feedbackText.isNotBlank()) {
+                    feedbackRef.setValue(feedbackData).addOnCompleteListener {
+                        progress.dismiss()
+                        if (it.isSuccessful) {
+                            Toast.makeText(
+                                context,
+                                "Feedback Submission successful",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                            navController.popBackStack()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "ERROR: ${it.exception!!.message}",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                            navController.popBackStack()
+                        }
+                    }
+                } else {
+                    Toast.makeText(context, "Fill in all the required(*) fields", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+        } else {
+            Toast.makeText(context, "User not found", Toast.LENGTH_LONG).show()
+        }
+    }
 }

@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.e_library.R
 import com.example.e_library.navigation.ROUTE_ADMIN_LOGIN
 import com.example.e_library.navigation.ROUTE_CLIENT_HOME
+import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_LOGIN
 import com.example.e_library.navigation.ROUTE_STAFF_HOME
 import com.example.e_library.navigation.ROUTE_VIEW_BOOKS_GUEST
 import com.example.e_library.ui.theme.ELibraryTheme
@@ -180,56 +181,110 @@ fun HomeScreen(navController: NavController){
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                OutlinedCard(
+                Row {
+                    OutlinedCard(
 //            onClick = { navController.navigate(ROUTE_STAFF_HOME)},
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.Blue,
-                        contentColor = Color.Blue
-                    ),
-                    border = BorderStroke(1.dp, Color.Black),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            top = 0.dp,
-                            bottom = 0.dp
-                        )
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.client_icon),
-                            contentDescription = "Staff Icon",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 0.dp,
-                                    top = 10.dp,
-                                    bottom = 0.dp,
-                                    end = 0.dp
-                                )
-                                .size(120.dp)
-                        )
-
-                    }
-                    Button(
-                        onClick = { navController.navigate(ROUTE_CLIENT_HOME) },
-                        colors = ButtonDefaults.buttonColors(Color.Black),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Blue,
+                            contentColor = Color.Blue
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(
                                 start = 10.dp,
                                 end = 10.dp,
-                                top = 10.dp,
-                                bottom = 10.dp
+                                top = 0.dp,
+                                bottom = 0.dp
                             )
+                            .width(180.dp)
                     ) {
-                        Text(
-                            text = "Client",
-                            color = Color.Cyan
-                        )
+                        Box(
+//                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.client_icon),
+                                contentDescription = "Client Icon",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 0.dp,
+                                        top = 10.dp,
+                                        bottom = 0.dp,
+                                        end = 0.dp
+                                    )
+                                    .size(120.dp)
+                            )
+
+                        }
+                        Button(
+                            onClick = { navController.navigate(ROUTE_CLIENT_HOME) },
+                            colors = ButtonDefaults.buttonColors(Color.Black),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                )
+                        ) {
+                            Text(
+                                text = "Client",
+                                color = Color.Cyan
+                            )
+                        }
+                    }
+                    OutlinedCard(
+//            onClick = { navController.navigate(ROUTE_STAFF_HOME)},
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Yellow,
+                            contentColor = Color.Blue
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                end = 10.dp,
+                                top = 0.dp,
+                                bottom = 0.dp
+                            )
+                            .width(180.dp)
+                    ) {
+                        Box(
+//                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.delivery_icon),
+                                contentDescription = "Delivery Icon",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 0.dp,
+                                        top = 10.dp,
+                                        bottom = 0.dp,
+                                        end = 0.dp
+                                    )
+                                    .size(120.dp)
+                            )
+
+                        }
+                        Button(
+                            onClick = { navController.navigate(ROUTE_DELIVERY_PERSONNEL_LOGIN) },
+                            colors = ButtonDefaults.buttonColors(Color.Black),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                )
+                        ) {
+                            Text(
+                                text = "Delivery",
+                                color = Color.Cyan
+                            )
+                        }
                     }
                 }
                 Card(
