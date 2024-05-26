@@ -33,7 +33,7 @@ import com.example.e_library.ui.theme.screens.borrowing.ViewClientBorrowedBooks
 import com.example.e_library.ui.theme.screens.borrowing.ViewStaffBorrowedBooks
 import com.example.e_library.ui.theme.screens.borrowing.ViewClientsScreen
 import com.example.e_library.ui.theme.screens.cart.AddCartScreen
-import com.example.e_library.ui.theme.screens.cart.DeliveryDetails
+import com.example.e_library.ui.theme.screens.delivery.DeliveryDetails
 import com.example.e_library.ui.theme.screens.cart.ViewBooksAddedToCart
 import com.example.e_library.ui.theme.screens.cart.ViewCartClientsDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.cart.ViewCartItemsForClient
@@ -53,6 +53,8 @@ import com.example.e_library.ui.theme.screens.contact.ContactStaffAsDeliveryPers
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsStaff
 import com.example.e_library.ui.theme.screens.contact.ContactUsScreen
 import com.example.e_library.ui.theme.screens.dashboard.DashboardScreen
+import com.example.e_library.ui.theme.screens.delivery.ClientViewMyDelivery
+import com.example.e_library.ui.theme.screens.delivery.CourierViewClientDelivery
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelEditAccount
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelHome
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelLoginScreen
@@ -415,6 +417,18 @@ fun AppNavHost(
                 passedData.arguments?.getString("cartOrderId")!!,
                 passedData.arguments?.getString("clientId")!!,
                 passedData.arguments?.getString("bookId")!!,
+            )
+        }
+        composable("$ROUTE_CLIENT_VIEW_MY_DELIVERY/{clientId}"){passedData->
+            passedData.arguments?.getString("clientId")?.let {
+                ClientViewMyDelivery(navController, it)
+            }
+        }
+        composable("$ROUTE_COURIER_VIEW_CLIENT_DELIVERY/{clientId}/{deliveryPersonnelId}"){passedData->
+            CourierViewClientDelivery(
+                navController,
+                passedData.arguments?.getString("clientId")!!,
+                passedData.arguments?.getString("deliveryPersonnelId")!!
             )
         }
     }

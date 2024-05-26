@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -12,9 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +33,10 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     navController: NavController
 ) {
-    var progress by remember { mutableFloatStateOf(0f) }
+    var progress by remember { mutableStateOf(0f) }
+    var count by remember {
+        mutableStateOf(0)
+    }
 
     var startAnimation by remember { mutableStateOf(false) }
     val alphaAnim = animateFloatAsState(
@@ -40,8 +46,13 @@ fun SplashScreen(
     )
 
     LaunchedEffect(key1 = true) {
-        startAnimation = true
-        delay(20000) // Display splash screen for 3 seconds
+        while (progress < 1f && count < 100) {
+            delay(100)
+            progress += 0.01f
+            count += 1
+            startAnimation = true
+        }
+        delay(3000) // Display splash screen for 3 seconds
         navController.navigate(ROUTE_DASHBOARD) {
             popUpTo(ROUTE_SPLASH) { inclusive = true }
         }
@@ -83,6 +94,25 @@ fun SplashScreen(
                 modifier = Modifier.width(64.dp),
                 color = Color.Blue,
                 trackColor = Color.Yellow,
+            )
+            Spacer(modifier = Modifier.height(35.dp))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(3.dp))
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .height(10.dp),
+                color = Color.White,
+                trackColor = Color.Red
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "LOADING $count %",
+                fontFamily = FontFamily.Cursive,
+                color = Color.Green,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
             )
 
         }

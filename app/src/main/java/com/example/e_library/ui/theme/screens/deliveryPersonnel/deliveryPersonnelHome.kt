@@ -1,6 +1,7 @@
 package com.example.e_library.ui.theme.screens.deliveryPersonnel
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,11 +66,21 @@ import com.example.e_library.navigation.ROUTE_USER_MANUAL_DELIVERY_PERSONNEL
 import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENTS_DELIVERY_PERSONNEL
 import com.example.e_library.navigation.ROUTE_VIEW_DELIVERY_PERSONNEL_ACCOUNT
 import com.example.e_library.ui.theme.Pink40
+import com.example.e_library.ui.theme.Purple40
+import com.example.e_library.ui.theme.Purple80
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DeliveryPersonnelHome(navController: NavController, deliveryPersonnelId: String){
-    Box {
+    Box (
+        modifier = Modifier.fillMaxSize()
+    ){
+        Image(
+            painter = painterResource(id = R.drawable.delivery_home),
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.FillBounds
+        )
         Column {
             Box (
                 modifier = Modifier.fillMaxWidth(),
@@ -78,9 +90,19 @@ fun DeliveryPersonnelHome(navController: NavController, deliveryPersonnelId: Str
             }
             Column (
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.verticalScroll(state = rememberScrollState(), enabled = true, reverseScrolling = false)
+                modifier = Modifier
+                    .verticalScroll(
+                        state = rememberScrollState(),
+                        enabled = true,
+                        reverseScrolling = false
+                    )
+                    .padding(20.dp)
             ){
-                Card {
+                Card (
+                    colors = CardDefaults.cardColors(containerColor = Purple40),
+                    border = BorderStroke(1.dp, Color.Yellow),
+                    shape = RoundedCornerShape(20.dp)
+                ){
                     Image(
                         painter = painterResource(id = R.drawable.cart_icon),
                         contentDescription = null,
@@ -90,8 +112,9 @@ fun DeliveryPersonnelHome(navController: NavController, deliveryPersonnelId: Str
                     )
                     Button(onClick = { navController.navigate("$ROUTE_VIEW_CART_CLIENTS_DELIVERY_PERSONNEL/$deliveryPersonnelId") },
                         modifier = Modifier.fillMaxWidth()
+                            .padding(10.dp)
                     ) {
-                        Text(text = "Cart Items")
+                        Text(text = "Clients")
                     }
                 }
             }

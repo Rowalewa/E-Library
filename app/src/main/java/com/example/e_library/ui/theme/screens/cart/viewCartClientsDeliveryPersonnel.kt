@@ -44,6 +44,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
 import com.example.e_library.data.DeliveryViewModel
 import com.example.e_library.models.CartOrder
+import com.example.e_library.navigation.ROUTE_COURIER_VIEW_CLIENT_DELIVERY
 import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_CART_ITEMS_FOR_CLIENT
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelAppTopBar
@@ -124,12 +125,6 @@ fun ClientCartItemsDelivery(
                     .padding(18.dp)
             )
             Text(
-                text = "Client ID: ${cartOrder.clientId}",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontFamily = FontFamily.Serif
-            )
-            Text(
                 text = "Client Name: ${cartOrder.cartOrderClientFullName}",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
@@ -142,7 +137,7 @@ fun ClientCartItemsDelivery(
                 fontFamily = FontFamily.Serif
             )
             Text(
-                text = "Client Phone number: ${cartOrder.cartOrderClientPhoneNumber}",
+                text = "Client Phone Number: ${cartOrder.cartOrderClientPhoneNumber}",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif
@@ -160,9 +155,20 @@ fun ClientCartItemsDelivery(
                     color = Color.White
                 )
             }
+            Button(onClick = { navController.navigate("$ROUTE_COURIER_VIEW_CLIENT_DELIVERY/${cartOrder.clientId}/$deliveryPersonnelId") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(7.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Yellow)
+            ) {
+                Text(
+                    text = "View Deliveries",
+                    color = Color.Black
+                )
+            }
         }
     }
     Spacer(
-        modifier = Modifier.height(20.dp)
+        modifier = Modifier.height(150.dp)
     )
 }

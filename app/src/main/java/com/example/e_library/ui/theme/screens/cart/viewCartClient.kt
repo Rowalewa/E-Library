@@ -35,13 +35,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
 import com.example.e_library.data.DeliveryViewModel
 import com.example.e_library.models.CartOrder
+import com.example.e_library.navigation.ROUTE_CLIENT_VIEW_MY_DELIVERY
 
 @Composable
 fun ViewBooksAddedToCart(navController: NavHostController, clientId: String){
@@ -288,53 +292,61 @@ fun BookCartItems(
             Text(
                 text = "Order Status: \n $cartOrderStatus",
                 color = Color.Black,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .background(color = Color.White),
                 textAlign = TextAlign.Center
             )
-            if (cartOrderStatus == "Ordered") {
-                Button(
-                    onClick = {
-                        val deliveryViewModel = DeliveryViewModel(navController, context)
-                        deliveryViewModel.removeFromCart(
-                            cartOrderId,
-                            bookId,
-                            clientId
+            when (cartOrderStatus) {
+                "Ordered" -> {
+                    Button(
+                        onClick = {
+                            val deliveryViewModel = DeliveryViewModel(navController, context)
+                            deliveryViewModel.removeFromCart(
+                                cartOrderId,
+                                bookId,
+                                clientId
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text(
+                            text = "Remove from cart"
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
+                    }
+                }
+                "Delivered" -> {
                     Text(
-                        text = "Remove from cart"
+                        text = "The order was delivered successfully, Delete?",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Button(onClick = {
+                        navController.navigate("$ROUTE_CLIENT_VIEW_MY_DELIVERY/$clientId")
+                    },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text(text = "Delete")
+                    }
+                }
+                else -> {
+                    Text(
+                        text = "Please wait for arrival \uD83D\uDE09",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
-//            if (borrowStatus != "Delivered") {
-//                Button(
-//                    onClick = {
-//                        val transactionViewModel = TransactionViewModel(navController, context)
-//                        transactionViewModel.deliveryApproval(
-//                            clientId,
-//                            borrowId
-//                        )
-//                    },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(
-//                            start = 10.dp,
-//                            end = 10.dp,
-//                            top = 5.dp,
-//                            bottom = 5.dp
-//                        ),
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-//                ) {
-//                    Text(
-//                        text = "Delivery Approved"
-//                    )
-//
-//                }
-//            }
         }
     }
     Spacer(modifier = Modifier.height(150.dp))

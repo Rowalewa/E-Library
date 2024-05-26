@@ -17,8 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,8 +36,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.e_library.R
@@ -89,6 +95,7 @@ fun ViewCartItemsForClient(navController: NavHostController, deliveryPersonnelId
                                 cartOrderBookSynopsis = cart.cartOrderBookSynopsis,
                                 cartOrderBookImageUrl = cart.cartOrderBookImageUrl,
                                 cartOrderBookQuantity = cart.cartOrderBookQuantity,
+                                cartOrderClientProfilePictureUrl = cart.cartOrderClientProfilePictureUrl,
                                 clientId = cart.clientId,
                                 cartOrderClientFullName = cart.cartOrderClientFullName,
                                 cartOrderClientEmailAddress = cart.cartOrderClientEmailAddress,
@@ -128,6 +135,7 @@ fun BookCartItemsDeliveryPersonnel(
     cartOrderBookSynopsis: String,
     cartOrderBookImageUrl: String,
     cartOrderBookQuantity: Int,
+    cartOrderClientProfilePictureUrl: String,
     clientId: String,
     cartOrderClientFullName: String,
     cartOrderClientEmailAddress: String,
@@ -225,14 +233,20 @@ fun BookCartItemsDeliveryPersonnel(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = "Client Id:\n $clientId",
-                color = Color.Black,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White),
-                textAlign = TextAlign.Center
-            )
+            Card (
+                colors = CardDefaults.cardColors(containerColor = Color.Yellow),
+                shape = RoundedCornerShape(30.dp)
+            ){
+                Image(
+                    painter = rememberAsyncImagePainter(cartOrderClientProfilePictureUrl),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .size(400.dp)
+                        .padding(18.dp)
+                        .background(color = Color.DarkGray, shape = RoundedCornerShape(20.dp))
+                )
+            }
             Text(
                 text = "Client Full Name:\n $cartOrderClientFullName",
                 color = Color.Black,
@@ -289,71 +303,45 @@ fun BookCartItemsDeliveryPersonnel(
                     .background(color = Color.White),
                 textAlign = TextAlign.Center
             )
-//            if (cartOrderStatus == "Ordered") {
-                Button(
-                    onClick = {
-                        val deliveryViewModel = DeliveryViewModel(navController, context)
-                        deliveryViewModel.pickUpApproval(
-                            clientId,
-                            cartOrderId,
+            when (cartOrderStatus) {
+                "Ordered" -> {
+                    Button(
+                        onClick = {
+                            Log.d("Message", "$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
+                            navController.navigate("$ROUTE_DELIVERY_DETAILS/$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
+        //                    Log.d("Message", "$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+                    ) {
+                        Text(
+                            text = "Confirm Delivery Details"
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
-                ) {
+                    }
+                }
+                "Delivered" -> {
                     Text(
-                        text = "Check Out"
+                        text = "The order was delivered successfully",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
-//            } else{
-                Button(
-                    onClick = { /*TODO one for seeing all the details plus the delivery guy*/ },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                ) {
+                else -> {
                     Text(
-                        text = "View Delivery Details"
+                        text = "Delivery in process \uD83D\uDE09",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
-            Button(
-                onClick = {
-                    Log.d("Message", "$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
-                    navController.navigate("$ROUTE_DELIVERY_DETAILS/$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
-//                    Log.d("Message", "$deliveryPersonnelId/$cartOrderId/$clientId/$bookId")
-                          },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-            ) {
-                Text(
-                    text = "Fill Delivery Details"
-                )
             }
-//            }
-//            if (borrowStatus != "Delivered") {
-//                Button(
-//                    onClick = {
-//                        val transactionViewModel = TransactionViewModel(navController, context)
-//                        transactionViewModel.deliveryApproval(
-//                            clientId,
-//                            borrowId
-//                        )
-//                    },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(
-//                            start = 10.dp,
-//                            end = 10.dp,
-//                            top = 5.dp,
-//                            bottom = 5.dp
-//                        ),
-//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-//                ) {
-//                    Text(
-//                        text = "Delivery Approved"
-//                    )
-//
-//                }
-//            }
         }
     }
     Spacer(modifier = Modifier.height(150.dp))

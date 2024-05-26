@@ -1,4 +1,4 @@
-package com.example.e_library.ui.theme.screens.cart
+package com.example.e_library.ui.theme.screens.delivery
 
 import android.os.Build
 import android.util.Log
@@ -7,17 +7,13 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,7 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.e_library.models.Books
+import com.example.e_library.data.DeliveryViewModel
 import com.example.e_library.models.CartOrder
 import com.example.e_library.models.DeliveryPersonnel
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelAppTopBar
@@ -51,6 +47,9 @@ import java.time.LocalDate
 fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: String, cartOrderId:String, clientId: String, bookId: String) {
     val context = LocalContext.current
     val today = LocalDate.now().toString()
+    val deliveryPersonnelProfilePictureUrl by remember {
+        mutableStateOf("")
+    }
     val deliveryPersonnelFullName by remember {
         mutableStateOf("")
     }
@@ -62,6 +61,12 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
     }
     var deliveryBookId by remember {
         mutableStateOf(TextFieldValue(bookId))
+    }
+    var deliveryCartOrderId by remember {
+        mutableStateOf(TextFieldValue(cartOrderId))
+    }
+    val deliveryClientId by remember {
+        mutableStateOf(TextFieldValue(clientId))
     }
     val deliveryBookTitle by remember {
         mutableStateOf("")
@@ -85,6 +90,9 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
         mutableStateOf("")
     }
     val deliveryBookQuantity by remember {
+        mutableStateOf("")
+    }
+    val deliveryClientProfilePictureUrl by remember {
         mutableStateOf("")
     }
     val deliveryClientFullName by remember {
@@ -113,6 +121,9 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
     }
     var deliveryDepartureDate by remember {
         mutableStateOf(today)
+    }
+    var mDeliveryPersonnelProfilePictureUrl by remember {
+        mutableStateOf(TextFieldValue(deliveryClientProfilePictureUrl))
     }
     var mDeliveryPersonnelFullName by remember {
         mutableStateOf(TextFieldValue(deliveryPersonnelFullName))
@@ -146,6 +157,9 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
     }
     var mDeliveryBookQuantity by remember {
         mutableStateOf(TextFieldValue(deliveryBookQuantity))
+    }
+    var mDeliveryClientProfilePictureUrl by remember {
+        mutableStateOf(TextFieldValue(deliveryClientProfilePictureUrl))
     }
     var mDeliveryClientFullName by remember {
         mutableStateOf(TextFieldValue(deliveryClientFullName))
@@ -182,6 +196,7 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
             if (snapshot.exists()) {
                 val cartOrder = snapshot.getValue(CartOrder::class.java)
                 if (cartOrder != null) {
+                    deliveryCartOrderId = TextFieldValue(cartOrder.cartOrderId)
                     deliveryBookId = TextFieldValue(cartOrder.cartOrderBookId)
                     mDeliveryBookTitle = TextFieldValue(cartOrder.cartOrderBookTitle)
                     mDeliveryBookAuthor = TextFieldValue(cartOrder.cartOrderBookAuthor)
@@ -191,6 +206,7 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
                     mDeliveryBookSynopsis = TextFieldValue(cartOrder.cartOrderBookSynopsis)
                     mDeliveryBookImageUrl = TextFieldValue(cartOrder.cartOrderBookImageUrl)
                     mDeliveryBookQuantity = TextFieldValue(cartOrder.cartOrderBookQuantity.toString())
+                    mDeliveryClientProfilePictureUrl = TextFieldValue(cartOrder.cartOrderClientProfilePictureUrl)
                     mDeliveryClientFullName = TextFieldValue(cartOrder.cartOrderClientFullName)
                     mDeliveryClientEmailAddress = TextFieldValue(cartOrder.cartOrderClientEmailAddress)
                     mDeliveryClientPhoneNumber = TextFieldValue(cartOrder.cartOrderClientPhoneNumber)
@@ -222,6 +238,7 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
             if (snapshot.exists()) {
                 val deliveryPersonnel = snapshot.getValue(DeliveryPersonnel::class.java)
                 if (deliveryPersonnel != null) {
+                    mDeliveryPersonnelProfilePictureUrl = TextFieldValue(deliveryPersonnel.deliveryPersonnelProfilePictureUrl)
                     mDeliveryPersonnelFullName = TextFieldValue(deliveryPersonnel.fullName)
                     mDeliveryPersonnelEmailAddress = TextFieldValue(deliveryPersonnel.email)
                     mDeliveryPersonnelPhoneNumber = TextFieldValue(deliveryPersonnel.phoneNumber)
@@ -486,6 +503,19 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
                     )
                 )
                 OutlinedTextField(
+                    value = mDeliveryCartOrderStatus,
+                    onValueChange = { mDeliveryCartOrderStatus = it },
+                    label = { Text("Current Order Status") },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.Black,
+                        focusedLabelColor = Color.Blue,
+                        unfocusedLabelColor = Color.Red
+                    )
+                )
+                OutlinedTextField(
                     value = deliveryDepartureDate,
                     onValueChange = { deliveryDepartureDate = it },
                     label = { Text("Delivery Departure Date") },
@@ -499,6 +529,42 @@ fun DeliveryDetails(navController: NavHostController, deliveryPersonnelId: Strin
                     ),
                     readOnly = true
                 )
+                Button(onClick = {
+                    val deliveryViewModel = DeliveryViewModel(navController, context)
+                    deliveryViewModel.submitDeliveryDetails(
+                        deliveryPersonnelId.trim(),
+                        mDeliveryPersonnelProfilePictureUrl.text.trim(),
+                        mDeliveryPersonnelFullName.text.trim(),
+                        mDeliveryPersonnelEmailAddress.text.trim(),
+                        mDeliveryPersonnelPhoneNumber.text.trim(),
+                        deliveryBookId.text.trim(),
+                        mDeliveryBookTitle.text.trim(),
+                        mDeliveryBookAuthor.text.trim(),
+                        mDeliveryBookISBNNumber.text.trim(),
+                        mDeliveryBookGenre.text.trim(),
+                        mDeliveryBookPublisher.text.trim(),
+                        mDeliveryBookSynopsis.text.trim(),
+                        mDeliveryBookImageUrl.text.trim(),
+                        mDeliveryBookQuantity.text.toIntOrNull()?: 0,
+                        deliveryClientId.text.trim(),
+                        mDeliveryClientProfilePictureUrl.text.trim(),
+                        mDeliveryClientFullName.text.trim(),
+                        mDeliveryClientEmailAddress.text.trim(),
+                        mDeliveryClientPhoneNumber.text.trim(),
+                        mDeliveryLocationName.text.trim(),
+                        mDeliveryLocationPrice.text.trim(),
+                        mDeliveryLocationDistanceInKm.text.trim(),
+                        mDeliveryCartOrderDate.text.trim(),
+                        deliveryCartOrderStatus = "Delivery",
+                        deliveryCartOrderId.text.trim(),
+                        deliveryDepartureDate.trim(),
+                        deliveryArrivalDate = "",
+                    )
+                }) {
+                    Text(
+                        text = "Confirm"
+                    )
+                }
                 Spacer(modifier = Modifier.height(150.dp))
             }
         }

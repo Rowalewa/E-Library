@@ -64,6 +64,7 @@ import com.example.e_library.models.Clients
 import com.example.e_library.navigation.ROUTE_ABOUT_SCREEN_CLIENT
 import com.example.e_library.navigation.ROUTE_BORROW_HOME
 import com.example.e_library.navigation.ROUTE_CLIENT_FEEDBACK
+import com.example.e_library.navigation.ROUTE_CLIENT_VIEW_MY_DELIVERY
 import com.example.e_library.navigation.ROUTE_EULA_CLIENT
 import com.example.e_library.navigation.ROUTE_PRIVACY_POLICY_CLIENT
 import com.example.e_library.navigation.ROUTE_STAFF_CONTACT_AS_CLIENT
@@ -191,6 +192,13 @@ fun BorrowHomeScreen(navController: NavHostController, clientId: String){
                     ) {
                         Text(
                             text = "View Cart"
+                        )
+                    }
+                    Button(onClick = { navController.navigate("$ROUTE_CLIENT_VIEW_MY_DELIVERY/$clientId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "View Deliveries"
                         )
                     }
                 }

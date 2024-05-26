@@ -6,16 +6,17 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavController
 import com.example.e_library.models.Books
 import com.example.e_library.models.CartOrder
+import com.example.e_library.models.Delivery
+import com.example.e_library.navigation.ROUTE_COURIER_VIEW_CLIENT_DELIVERY
 import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENT
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.time.LocalDate
 
 @Suppress("DEPRECATION")
 class DeliveryViewModel(
@@ -27,8 +28,8 @@ class DeliveryViewModel(
     init {
         progress.setTitle("Processing")
         progress.setMessage("Please Wait...")
-        progress.setTitle("Removing from cart")
-        progress.setMessage("Please Wait...")
+        progressDelete.setTitle("Removing from cart")
+        progressDelete.setMessage("Please Wait...")
     }
     fun makeCartOrder(
         cartOrderBookId: String,
@@ -116,18 +117,9 @@ class DeliveryViewModel(
                                                     cartOrderRef.setValue(cartOrderData)
                                                         .addOnCompleteListener { task ->
                                                             if (task.isSuccessful) {
-                                                                // Update the book quantity and status
-                                                                val newQuantity = book.bookQuantity - cartOrderBookQuantity
-                                                                bookRef.child("bookQuantity").setValue(newQuantity).addOnCompleteListener {
-                                                                    if (it.isSuccessful) {
-                                                                        progress.dismiss()
-                                                                        Toast.makeText(context, "Book Added to cart", Toast.LENGTH_SHORT).show()
-                                                                        navController.navigateUp()
-                                                                    } else {
-                                                                        progress.dismiss()
-                                                                        Toast.makeText(context, "Failed to add book to cart", Toast.LENGTH_SHORT).show()
-                                                                    }
-                                                                }
+                                                                progress.dismiss()
+                                                                Toast.makeText(context, "Book Added to cart", Toast.LENGTH_SHORT).show()
+                                                                navController.navigateUp()
                                                             } else {
                                                                 progress.dismiss()
                                                                 Toast.makeText(context, "Failed to add book to cart", Toast.LENGTH_SHORT).show()
@@ -194,6 +186,113 @@ class DeliveryViewModel(
         })
     }
 
+    fun getDeliveryDetails(
+        clientId: String,
+        callback: (List<Delivery>) -> Unit
+    ) {
+        val ref = FirebaseDatabase.getInstance().getReference().child("Delivery").child(clientId)
+        val deliveryDetails = mutableListOf<Delivery>()
+
+        Log.d("CartBooks", "Client ID is: $clientId")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                deliveryDetails.clear()
+                for (snap in snapshot.children) {
+                    val value = snap.getValue(Delivery::class.java)
+                    value?.let {
+                        deliveryDetails.add(it)
+                    }
+                }
+                Toast.makeText(context, "Deliveries in process: ${deliveryDetails.size}", Toast.LENGTH_LONG).show()
+                callback(deliveryDetails) // Invoke the callback with the fetched data
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Delivery", "Error fetching delivery books: ${error.message}")
+                callback(emptyList()) // Handle the error by returning an empty list
+            }
+        })
+    }
+
+
+    fun removeFromCartAndDelivery(
+        cartOrderId: String,
+        bookId: String,
+        clientId: String,
+        deliveryId: String
+    ){
+        val delRef = FirebaseDatabase.getInstance().getReference().child("CartOrders/$clientId/$cartOrderId")
+        val delRefDelivery = FirebaseDatabase.getInstance().getReference().child("Delivery/$clientId/$deliveryId")
+        val cartOrderRef = FirebaseDatabase.getInstance().getReference().child("CartOrders/$clientId")
+        val bookRef = FirebaseDatabase.getInstance().getReference().child("Books").child(bookId)
+        progressDelete.show()
+        bookRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(bookSnapshot: DataSnapshot) {
+                val book = bookSnapshot.getValue(Books::class.java)
+                if (book != null) {
+                    cartOrderRef.addListenerForSingleValueEvent(object : ValueEventListener{
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val cartOrder = snapshot.getValue(CartOrder::class.java)
+                            if (cartOrder != null) {
+                                delRef.removeValue().addOnCompleteListener { task ->
+                                    delRefDelivery.removeValue().addOnCompleteListener {delDelivery->
+                                        if (delDelivery.isSuccessful) {
+                                            progressDelete.dismiss()
+                                            if (task.isSuccessful) {
+                                                progressDelete.dismiss()
+                                                Log.d(
+                                                    "Delete Book Cart Item",
+                                                    "Book removed from cart"
+                                                )
+                                                Toast.makeText(
+                                                    context,
+                                                    "Book removed from cart",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                navController.navigate("$ROUTE_VIEW_CART_CLIENT/$clientId")
+                                            } else {
+                                                progressDelete.dismiss()
+                                                Log.e(
+                                                    "Delete Book Cart Item",
+                                                    "Error removing book from cart",
+                                                    task.exception
+                                                )
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error removing book: ${task.exception?.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }else{
+                                            progressDelete.dismiss()
+                                            Toast.makeText(context, "Could not delete delivery details", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }
+                            }else{
+                                progressDelete.dismiss()
+                                Toast.makeText(context, "Cart Order not found", Toast.LENGTH_LONG).show()
+                            }
+                        }
+
+
+                        override fun onCancelled(error: DatabaseError) {
+                            progressDelete.dismiss()
+                            Toast.makeText(context, "Error", Toast.LENGTH_LONG).show()
+                        }
+                    })
+                }else{
+                    progressDelete.dismiss()
+                    Toast.makeText(context, "Book is null", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Error", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
     fun removeFromCart(
         cartOrderId: String,
         bookId: String,
@@ -211,13 +310,19 @@ class DeliveryViewModel(
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val cartOrder = snapshot.getValue(CartOrder::class.java)
                             if (cartOrder != null) {
-                                val newQuantity = book.bookQuantity + cartOrder.cartOrderBookQuantity // Increment quantity
-                                bookRef.child("bookQuantity").setValue(newQuantity)
                                 delRef.removeValue().addOnCompleteListener { task ->
+                                    progressDelete.dismiss()
                                     if (task.isSuccessful) {
                                         progressDelete.dismiss()
-                                        Log.d("Delete Book Cart Item", "Book removed from cart")
-                                        Toast.makeText(context, "Book removed from cart", Toast.LENGTH_SHORT).show()
+                                        Log.d(
+                                            "Delete Book Cart Item",
+                                            "Book removed from cart"
+                                        )
+                                        Toast.makeText(
+                                            context,
+                                            "Book removed from cart",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         navController.navigate("$ROUTE_VIEW_CART_CLIENT/$clientId")
                                     } else {
                                         progressDelete.dismiss()
@@ -257,30 +362,6 @@ class DeliveryViewModel(
         })
     }
 
-    fun viewCartOrders(
-        cartOrder: MutableState<CartOrder>,
-        cartOrders: SnapshotStateList<CartOrder>
-    ): SnapshotStateList<CartOrder> {
-        val ref = FirebaseDatabase.getInstance().getReference().child("CartOrders")
-        progress.show()
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                progress.dismiss()
-                cartOrders.clear()
-                for (snap in snapshot.children) {
-                    val value = snap.getValue(CartOrder::class.java)
-                    cartOrder.value = value!!
-                    cartOrders.add(value)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-            }
-        })
-        return cartOrders
-    }
-
     fun getCartClientsForDeliveryPersonnel(
         callback: (List<CartOrder>) -> Unit
     ) {
@@ -308,20 +389,42 @@ class DeliveryViewModel(
         })
     }
 
-    fun pickUpApproval(
+    fun deliveryCourierApproval(
         clientId: String,
-        cartOrderId: String
+        cartOrderId: String,
+        deliveryId: String,
+        deliveryPersonnelId: String
     ){
         val cartOrderRef = FirebaseDatabase.getInstance().getReference().child("CartOrders").child(clientId).child(cartOrderId)
+        val deliveryRef = FirebaseDatabase.getInstance().getReference().child("Delivery").child(clientId).child(deliveryId)
         cartOrderRef.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val cartOrdersSnapshot = snapshot.getValue(CartOrder::class.java)
                 if (cartOrdersSnapshot == null){
                     Toast.makeText(context, "Failed to fetch cart order; null", Toast.LENGTH_SHORT).show()
                 }else{
-                    val newCartOrderStatus = "Checked Out"
-                    cartOrderRef.child("cartOrderStatus").setValue(newCartOrderStatus)
-                    Log.d("Firebase", "Cart Order Status is: $newCartOrderStatus")
+                    val newCartOrderStatus = "Delivered"
+                    cartOrderRef.child("cartOrderStatus").setValue(newCartOrderStatus).addOnCompleteListener {cartTask->
+                        if (cartTask.isSuccessful) {
+                            deliveryRef.child("deliveryCartOrderStatus").setValue(newCartOrderStatus).addOnCompleteListener {deliveryStatusTask->
+                                if (deliveryStatusTask.isSuccessful) {
+                                    val today = LocalDate.now().toString()
+                                    deliveryRef.child("deliveryArrivalDate").setValue(today).addOnCompleteListener {dateTask->
+                                        if (dateTask.isSuccessful) {
+                                            Log.d("Firebase", "Cart Order Status is: $newCartOrderStatus")
+                                            navController.navigate("$ROUTE_COURIER_VIEW_CLIENT_DELIVERY/$clientId/$deliveryPersonnelId")
+                                        }else{
+                                            Toast.makeText(context, "Arrival Date could not be set to today", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                }else{
+                                    Toast.makeText(context, "Failed to change delivery status to delivered", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }else{
+                            Toast.makeText(context, "Failed to change cart order status to delivered", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
             }
 
@@ -331,5 +434,130 @@ class DeliveryViewModel(
 
         })
     }
+
+    fun submitDeliveryDetails(
+        deliveryPersonnelId: String,
+        deliveryPersonnelProfilePictureUrl: String,
+        deliveryPersonnelFullName: String,
+        deliveryPersonnelEmailAddress: String,
+        deliveryPersonnelPhoneNumber: String,
+        deliveryBookId: String,
+        deliveryBookTitle: String,
+        deliveryBookAuthor: String,
+        deliveryBookISBNNumber: String,
+        deliveryBookGenre: String,
+        deliveryBookPublisher: String,
+        deliveryBookSynopsis: String,
+        deliveryBookImageUrl: String,
+        deliveryBookQuantity: Int,
+        deliveryClientId: String,
+        deliveryClientProfilePictureUrl: String,
+        deliveryClientFullName: String,
+        deliveryClientEmailAddress: String,
+        deliveryClientPhoneNumber: String,
+        deliveryLocationName: String,
+        deliveryLocationPrice: String,
+        deliveryLocationDistanceInKm: String,
+        deliveryCartOrderDate: String,
+        deliveryCartOrderStatus: String,
+        deliveryCartOrderId: String,
+        deliveryDepartureDate: String,
+        deliveryArrivalDate: String
+    ){
+        val deliveryId = System.currentTimeMillis().toString()
+        val bookRef = FirebaseDatabase.getInstance().getReference("Books").child(deliveryBookId)
+        bookRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val book = snapshot.getValue(Books::class.java)
+                if (book != null) {
+                    val deliveryDetailsData = Delivery(
+                        deliveryPersonnelId,
+                        deliveryPersonnelProfilePictureUrl,
+                        deliveryPersonnelFullName,
+                        deliveryPersonnelEmailAddress,
+                        deliveryPersonnelPhoneNumber,
+                        deliveryBookId,
+                        deliveryBookTitle,
+                        deliveryBookAuthor,
+                        deliveryBookISBNNumber,
+                        deliveryBookGenre,
+                        deliveryBookPublisher,
+                        deliveryBookSynopsis,
+                        deliveryBookImageUrl,
+                        deliveryBookQuantity,
+                        deliveryClientId,
+                        deliveryClientProfilePictureUrl,
+                        deliveryClientFullName,
+                        deliveryClientEmailAddress,
+                        deliveryClientPhoneNumber,
+                        deliveryLocationName,
+                        deliveryLocationPrice,
+                        deliveryLocationDistanceInKm,
+                        deliveryCartOrderDate,
+                        deliveryCartOrderStatus,
+                        deliveryCartOrderId,
+                        deliveryDepartureDate,
+                        deliveryArrivalDate,
+                        deliveryId
+                    )
+
+                    val cartOrderRef = FirebaseDatabase.getInstance().getReference().child("CartOrders").child(deliveryClientId).child(deliveryCartOrderId)
+
+                    cartOrderRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val cartOrder = snapshot.getValue(CartOrder::class.java)
+                            if (cartOrder != null) {
+                                val newStatus = "Delivery"
+                                cartOrderRef.child("cartOrderStatus").setValue(newStatus).addOnCompleteListener {statusTask->
+                                    if (statusTask.isSuccessful) {
+                                        val deliveryRef =
+                                            FirebaseDatabase.getInstance().getReference("Delivery")
+                                                .child(deliveryClientId).child(deliveryId)
+                                        deliveryRef.setValue(deliveryDetailsData)
+                                            .addOnCompleteListener { task ->
+                                                if (task.isSuccessful) {
+                                                    val newQuantity = book.bookQuantity - deliveryBookQuantity
+                                                    bookRef.child("bookQuantity").setValue(newQuantity).addOnCompleteListener {quantitytask->
+                                                        if (quantitytask.isSuccessful) {
+                                                            progress.dismiss()
+                                                            Toast.makeText(context, "Book Added to cart", Toast.LENGTH_SHORT).show()
+                                                            navController.navigateUp()
+                                                        } else {
+                                                            progress.dismiss()
+                                                            Toast.makeText(context, "Failed to add book to cart", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    }
+                                                } else {
+                                                    progress.dismiss()
+                                                    Toast.makeText(context, "Failed to add book to cart", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                    }else{
+                                        Toast.makeText(context, "Failed to change status to delivery", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }else{
+                                Toast.makeText(context, "Cart order not found", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            progress.dismiss()
+                            Toast.makeText(context, "Failed to fetch cart details", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                } else {
+                    progress.dismiss()
+                    Toast.makeText(context, "Failed to fetch book details", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                progress.dismiss()
+                Toast.makeText(context, "Failed to fetch book details", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 
 }

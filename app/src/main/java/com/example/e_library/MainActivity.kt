@@ -45,7 +45,9 @@ import com.example.e_library.navigation.ROUTE_CLIENT_FEEDBACK
 import com.example.e_library.navigation.ROUTE_CLIENT_HOME
 import com.example.e_library.navigation.ROUTE_CLIENT_LOGIN
 import com.example.e_library.navigation.ROUTE_CLIENT_REGISTER
+import com.example.e_library.navigation.ROUTE_CLIENT_VIEW_MY_DELIVERY
 import com.example.e_library.navigation.ROUTE_CONTACT_US
+import com.example.e_library.navigation.ROUTE_COURIER_VIEW_CLIENT_DELIVERY
 import com.example.e_library.navigation.ROUTE_DASHBOARD
 import com.example.e_library.navigation.ROUTE_DELIVERY_DETAILS
 import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_CONTACT_AS_ADMIN
@@ -125,7 +127,7 @@ import com.example.e_library.ui.theme.screens.borrowing.ViewClientBorrowedBooks
 import com.example.e_library.ui.theme.screens.borrowing.ViewStaffBorrowedBooks
 import com.example.e_library.ui.theme.screens.borrowing.ViewClientsScreen
 import com.example.e_library.ui.theme.screens.cart.AddCartScreen
-import com.example.e_library.ui.theme.screens.cart.DeliveryDetails
+import com.example.e_library.ui.theme.screens.delivery.DeliveryDetails
 import com.example.e_library.ui.theme.screens.cart.ViewBooksAddedToCart
 import com.example.e_library.ui.theme.screens.cart.ViewCartClientsDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.cart.ViewCartItemsForClient
@@ -145,6 +147,8 @@ import com.example.e_library.ui.theme.screens.contact.ContactStaffAsDeliveryPers
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsStaff
 import com.example.e_library.ui.theme.screens.contact.ContactUsScreen
 import com.example.e_library.ui.theme.screens.dashboard.DashboardScreen
+import com.example.e_library.ui.theme.screens.delivery.ClientViewMyDelivery
+import com.example.e_library.ui.theme.screens.delivery.CourierViewClientDelivery
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelEditAccount
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelHome
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelLoginScreen
@@ -178,7 +182,6 @@ import com.example.e_library.ui.theme.screens.userManual.UserManualScreenClient
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenGuest
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenStaff
-import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     private val networkViewModel: NetworkViewModel by viewModels()
@@ -515,6 +518,18 @@ class MainActivity : ComponentActivity() {
                             passedData.arguments?.getString("bookId")!!,
                         )
                     }
+                    composable("$ROUTE_CLIENT_VIEW_MY_DELIVERY/{clientId}"){passedData->
+                        passedData.arguments?.getString("clientId")?.let {
+                            ClientViewMyDelivery(navController, it)
+                        }
+                    }
+                    composable("$ROUTE_COURIER_VIEW_CLIENT_DELIVERY/{clientId}/{deliveryPersonnelId}"){ passedData->
+                        CourierViewClientDelivery(
+                            navController,
+                            passedData.arguments?.getString("clientId")!!,
+                            passedData.arguments?.getString("deliveryPersonnelId")!!
+                        )
+                    }
                 }
 
                 var startDestination by remember {
@@ -563,7 +578,7 @@ class MainActivity : ComponentActivity() {
                             Toast.makeText(context, "No internet connection. Please check your connection.", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        Toast.makeText(context, "Failed to fetch your details, please login again", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
                     }
                 }
                 AppNavHost(startDestination = startDestination)

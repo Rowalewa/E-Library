@@ -367,20 +367,28 @@ class TransactionViewModel(
                 borrowedBooks.clear()
                 borrowedBooksClient.clear()
                 borrowedBooksStaff.clear()
-                for (snap in snapshot.children) {
-                    val value = snap.getValue(BorrowingBook::class.java)
-                    value?.let {
-                        borrowedBooks.add(it)
-                        when (it.borrowMeans) {
-                            "Client" -> borrowedBooksClient.add(it)
-                            "Staff" -> borrowedBooksStaff.add(it)
-                            else -> Toast.makeText(context, "Unknown borrow means: ${it.borrowMeans}", Toast.LENGTH_LONG).show()
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        val value = snap.getValue(BorrowingBook::class.java)
+                        value?.let {
+                            borrowedBooks.add(it)
+                            when (it.borrowMeans) {
+                                "Client" -> borrowedBooksClient.add(it)
+                                "Staff" -> borrowedBooksStaff.add(it)
+                                else -> Toast.makeText(
+                                    context,
+                                    "Unknown borrow means: ${it.borrowMeans}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     }
+                    val toastMessage =
+                        "Client borrowed books: ${borrowedBooksClient.size}, Staff borrowed books: ${borrowedBooksStaff.size}"
+                    Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
+                }else{
+                    Toast.makeText(context, "No items", Toast.LENGTH_LONG).show()
                 }
-
-                val toastMessage = "Client borrowed books: ${borrowedBooksClient.size}, Staff borrowed books: ${borrowedBooksStaff.size}"
-                Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
 
                 Log.d("BorrowedBooks", "Fetched ${borrowedBooks.size} books for client $clientId")
                 callback(borrowedBooks) // Invoke the callback with the fetched data
@@ -566,30 +574,6 @@ class TransactionViewModel(
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(context, "Failed to fetch client status", Toast.LENGTH_SHORT).show()
             }
-        })
-    }
-
-    fun pickUpApproval(
-        clientId: String,
-        cartOrderId: String
-    ){
-        val cartOrderRef = FirebaseDatabase.getInstance().getReference().child("CartOrders").child(clientId).child(cartOrderId)
-        cartOrderRef.addListenerForSingleValueEvent(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val cartOrdersSnapshot = snapshot.getValue(CartOrder::class.java)
-                if (cartOrdersSnapshot == null){
-                    Toast.makeText(context, "Failed to fetch cart order; null", Toast.LENGTH_SHORT).show()
-                }else{
-                    val newCartOrderStatus = "Checked Out"
-                    cartOrderRef.child("cartOrderStatus").setValue(newCartOrderStatus)
-                    Log.d("Firebase", "Cart Order Status is: $newCartOrderStatus")
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(context, "Failed to fetch cart order status", Toast.LENGTH_SHORT).show()
-            }
-
         })
     }
 
