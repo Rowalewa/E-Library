@@ -41,7 +41,6 @@ class BooksViewModel (
     fun saveBook(
         bookTitle: String,
         bookAuthor: String,
-        bookYearOfPublication: String,
         bookPrice: String,
         bookISBNNumber: String,
         bookPublisher: String,
@@ -51,7 +50,6 @@ class BooksViewModel (
         bookLanguage: String,
         bookNumberOfPages: String,
         bookAcquisitionMethod: String,
-        bookCondition: String,
         bookShelfNumber: String,
         bookSynopsis: String,
         filePath: Uri?,
@@ -62,10 +60,10 @@ class BooksViewModel (
         if (filePath != null) {
             storageReference.putFile(filePath).addOnCompleteListener { task ->
                 progress.show()
-                if (bookTitle.isBlank() || bookAuthor.isBlank() || bookCondition.isBlank() || bookPrice.isBlank() ||
+                if (bookTitle.isBlank() || bookAuthor.isBlank()  || bookPrice.isBlank() ||
                     bookISBNNumber.isBlank() || bookPublisher.isBlank() || bookPublicationDate.isBlank() ||
                     bookEdition.isBlank() || bookLanguage.isBlank() || bookNumberOfPages.isBlank() || bookAcquisitionMethod.isBlank() ||
-                    bookYearOfPublication.isBlank() || bookShelfNumber.isBlank() || bookSynopsis.isBlank()
+                    bookShelfNumber.isBlank() || bookSynopsis.isBlank()
                 ) {
                     progress.dismiss()
                     Toast.makeText(context, "Fill all the fields please", Toast.LENGTH_LONG).show()
@@ -95,7 +93,6 @@ class BooksViewModel (
                                         val houseData = Books(
                                             bookTitle,
                                             bookAuthor,
-                                            bookCondition,
                                             bookPrice,
                                             bookISBNNumber,
                                             bookPublisher,
@@ -105,7 +102,6 @@ class BooksViewModel (
                                             bookLanguage,
                                             bookNumberOfPages,
                                             bookAcquisitionMethod,
-                                            bookYearOfPublication,
                                             bookShelfNumber,
                                             bookSynopsis,
                                             bookImageUrl,
@@ -179,7 +175,6 @@ class BooksViewModel (
         bookId: String,
         bookTitle: String,
         bookAuthor: String,
-        bookYearOfPublication: String,
         bookPrice: String,
         bookISBNNumber: String,
         bookPublisher: String,
@@ -189,7 +184,6 @@ class BooksViewModel (
         bookLanguage: String,
         bookNumberOfPages: String,
         bookAcquisitionMethod: String,
-        bookCondition: String,
         bookShelfNumber: String,
         bookSynopsis: String,
         bookQuantity: Int,
@@ -200,7 +194,6 @@ class BooksViewModel (
         val updateData = Books(
             bookTitle,
             bookAuthor,
-            bookYearOfPublication,
             bookPrice,
             bookISBNNumber,
             bookPublisher,
@@ -210,7 +203,6 @@ class BooksViewModel (
             bookLanguage,
             bookNumberOfPages,
             bookAcquisitionMethod,
-            bookCondition,
             bookShelfNumber,
             bookSynopsis,
             "",
@@ -280,7 +272,6 @@ class BooksViewModel (
                     val updateData = Books(
                         bookTitle,
                         bookAuthor,
-                        bookYearOfPublication,
                         bookPrice,
                         bookISBNNumber,
                         bookPublisher,
@@ -290,7 +281,6 @@ class BooksViewModel (
                         bookLanguage,
                         bookNumberOfPages,
                         bookAcquisitionMethod,
-                        bookCondition,
                         bookShelfNumber,
                         bookSynopsis,
                         existingImageUrl,

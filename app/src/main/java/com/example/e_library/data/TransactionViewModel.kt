@@ -228,16 +228,13 @@ class TransactionViewModel(
                     if (borrowedBook != null && borrowedBook.clientId == clientId) {
                         if (borrowedBook.borrowDate.isNotBlank()  && borrowedBook.returnDate.isNotBlank()) {
                             Log.d("FirebaseDatabase", "Borrow id is: ${borrowedBook.borrowId}")
-                            val bookRef =
-                                FirebaseDatabase.getInstance().getReference().child("Books")
-                                    .child(bookId)
+                            val bookRef = FirebaseDatabase.getInstance().getReference().child("Books").child(bookId)
                             bookRef.addListenerForSingleValueEvent(object : ValueEventListener {
                                 @RequiresApi(Build.VERSION_CODES.O)
                                 override fun onDataChange(bookSnapshot: DataSnapshot) {
                                     val book = bookSnapshot.getValue(Books::class.java)
                                     if (book != null) {
-                                        val dueDate =
-                                            LocalDate.parse(borrowedBook.returnDate)
+                                        val dueDate = LocalDate.parse(borrowedBook.returnDate)
                                         val today = LocalDate.now()
                                         val daysLate = dueDate.until(today, ChronoUnit.DAYS)
                                         val fine = if (daysLate > 0) {
@@ -247,12 +244,9 @@ class TransactionViewModel(
                                             0.0
                                         }
 
-                                        val newQuantity =
-                                            book.bookQuantity + 1 // Increment quantity
+                                        val newQuantity = book.bookQuantity + 1 // Increment quantity
                                         bookRef.child("bookQuantity").setValue(newQuantity)
-                                        val clientRef =
-                                            FirebaseDatabase.getInstance().getReference("Client")
-                                                .child(clientId)
+                                        val clientRef = FirebaseDatabase.getInstance().getReference("Client").child(clientId)
                                         clientRef.addListenerForSingleValueEvent(object :
                                             ValueEventListener {
                                             override fun onDataChange(snapshot: DataSnapshot) {
@@ -269,25 +263,13 @@ class TransactionViewModel(
 
                                                     if (client.clientStatus != newClientStatus) {
                                                         progressLoad.dismiss()
-                                                        clientRef.child("clientStatus")
-                                                            .setValue(newClientStatus)
-                                                        Toast.makeText(
-                                                            context,
-                                                            "Client Status changed to Fined",
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
+                                                        clientRef.child("clientStatus").setValue(newClientStatus)
+                                                        Toast.makeText(context, "Client Status changed to Fined", Toast.LENGTH_LONG).show()
                                                     }
                                                 } else {
                                                     progressLoad.dismiss()
-                                                    Log.e(
-                                                        ContentValues.TAG,
-                                                        "Client not found for ID: $clientId"
-                                                    )
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Client not found for id: $clientId",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
+                                                    Log.e(ContentValues.TAG, "Client not found for ID: $clientId")
+                                                    Toast.makeText(context, "Client not found for id: $clientId", Toast.LENGTH_LONG).show()
                                                 }
                                             }
 

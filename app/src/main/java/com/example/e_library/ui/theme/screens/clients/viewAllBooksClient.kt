@@ -92,8 +92,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                         "",
                         "",
                         "",
-                        "",
-                        "",
                         0,
                         ""
                     )
@@ -159,7 +157,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                 fun BookItem(
                     bookTitle: String,
                     bookAuthor: String,
-                    bookYearOfPublication: String,
                     bookPrice: String,
                     bookISBNNumber: String,
                     bookPublisher: String,
@@ -169,7 +166,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                     bookLanguage: String,
                     bookNumberOfPages: String,
                     bookAcquisitionMethod: String,
-                    bookCondition: String,
                     bookShelfNumber: String,
                     bookSynopsis: String,
                     bookImageUrl: String,
@@ -211,10 +207,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                                 color = Color.Black
                             )
                             Text(
-                                text = "Book Year of Publication: $bookYearOfPublication",
-                                color = Color.Black
-                            )
-                            Text(
                                 text = "Book Price: $bookPrice",
                                 color = Color.Black
                             )
@@ -252,10 +244,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                             )
                             Text(
                                 text = "Book Acquisition Method: $bookAcquisitionMethod",
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "Book Condition: $bookCondition",
                                 color = Color.Black
                             )
                             Text(
@@ -314,7 +302,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                                 it.bookAuthor.contains(searchText, ignoreCase = true) ||
                                 it.bookGenre.contains(searchText, ignoreCase = true) ||
                                 it.bookPublisher.contains(searchText, ignoreCase = true) ||
-                                it.bookCondition.contains(searchText, ignoreCase = true) ||
                                 it.bookAcquisitionMethod.contains(searchText, ignoreCase = true) ||
                                 it.bookEdition.contains(searchText, ignoreCase = true) ||
                                 it.bookISBNNumber.contains(searchText, ignoreCase = true)
@@ -323,7 +310,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                         BookItem(
                             bookTitle = it.bookTitle,
                             bookAuthor = it.bookAuthor,
-                            bookYearOfPublication = it.bookYearOfPublication,
                             bookPrice = it.bookPrice,
                             bookISBNNumber = it.bookISBNNumber,
                             bookPublisher = it.bookPublisher,
@@ -333,7 +319,6 @@ fun ViewAllBooksClient(navController: NavHostController, clientId: String){
                             bookLanguage = it.bookLanguage,
                             bookNumberOfPages = it.bookNumberOfPages,
                             bookAcquisitionMethod = it.bookAcquisitionMethod,
-                            bookCondition = it.bookCondition,
                             bookShelfNumber = it.bookShelfNumber,
                             bookSynopsis = it.bookSynopsis,
                             bookImageUrl = it.bookImageUrl,

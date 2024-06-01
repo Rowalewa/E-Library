@@ -53,7 +53,7 @@ fun AdminDeliveryPersonnelEdit(navController: NavHostController, adminId: String
     Box(
         modifier = Modifier.fillMaxSize()
     ){
-        Image(painter = painterResource(id = R.drawable.admin_staff_edit_screen),
+        Image(painter = painterResource(id = R.drawable.admin_delivery_edit),
             contentDescription = "View Clients Image",
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.FillBounds

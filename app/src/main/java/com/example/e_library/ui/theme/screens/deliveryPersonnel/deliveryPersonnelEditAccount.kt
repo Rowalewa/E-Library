@@ -134,8 +134,8 @@ fun DeliveryPersonnelEditAccount(navController: NavHostController, deliveryPerso
     } )
     Box{
         Image(
-            painter = painterResource(id = R.drawable.admin_edit_account),
-            contentDescription = "View Clients Image",
+            painter = painterResource(id = R.drawable.delivery_personnel_edit_account),
+            contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.FillBounds
         )

@@ -125,8 +125,8 @@ fun DeliveryPersonnelRegisterScreen(navController: NavController){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
-        Image(painter = painterResource(id = R.drawable.admin_register_screen),
-            contentDescription = "View Clients Image",
+        Image(painter = painterResource(id = R.drawable.delivery_personnel_register),
+            contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.FillBounds
         )

@@ -93,8 +93,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                             "",
                             "",
                             "",
-                            "",
-                            "",
                             0,
                             ""
                         )
@@ -160,7 +158,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                     fun BookItem(
                         bookTitle: String,
                         bookAuthor: String,
-                        bookYearOfPublication: String,
                         bookPrice: String,
                         bookISBNNumber: String,
                         bookPublisher: String,
@@ -170,7 +167,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                         bookLanguage: String,
                         bookNumberOfPages: String,
                         bookAcquisitionMethod: String,
-                        bookCondition: String,
                         bookShelfNumber: String,
                         bookSynopsis: String,
                         bookImageUrl: String,
@@ -214,10 +210,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                                     color = Color.Black
                                 )
                                 Text(
-                                    text = "Book Year of Publication: $bookYearOfPublication",
-                                    color = Color.Black
-                                )
-                                Text(
                                     text = "Book Price: $bookPrice",
                                     color = Color.Black
                                 )
@@ -255,10 +247,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                                 )
                                 Text(
                                     text = "Book Acquisition Method: $bookAcquisitionMethod",
-                                    color = Color.Black
-                                )
-                                Text(
-                                    text = "Book Condition: $bookCondition",
                                     color = Color.Black
                                 )
                                 Text(
@@ -339,7 +327,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                                     it.bookAuthor.contains(searchText, ignoreCase = true) ||
                                     it.bookGenre.contains(searchText, ignoreCase = true) ||
                                     it.bookPublisher.contains(searchText, ignoreCase = true) ||
-                                    it.bookCondition.contains(searchText, ignoreCase = true) ||
                                     it.bookAcquisitionMethod.contains(searchText, ignoreCase = true) ||
                                     it.bookEdition.contains(searchText, ignoreCase = true) ||
                                     it.bookISBNNumber.contains(searchText, ignoreCase = true)
@@ -348,7 +335,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                             BookItem(
                                 bookTitle = it.bookTitle,
                                 bookAuthor = it.bookAuthor,
-                                bookYearOfPublication = it.bookYearOfPublication,
                                 bookPrice = it.bookPrice,
                                 bookISBNNumber = it.bookISBNNumber,
                                 bookPublisher = it.bookPublisher,
@@ -358,7 +344,6 @@ fun ViewBooksScreen(navController: NavHostController, clientId: String, staffId:
                                 bookLanguage = it.bookLanguage,
                                 bookNumberOfPages = it.bookNumberOfPages,
                                 bookAcquisitionMethod = it.bookAcquisitionMethod,
-                                bookCondition = it.bookCondition,
                                 bookShelfNumber = it.bookShelfNumber,
                                 bookSynopsis = it.bookSynopsis,
                                 bookImageUrl = it.bookImageUrl,

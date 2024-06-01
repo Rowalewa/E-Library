@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -52,6 +53,7 @@ import com.example.e_library.navigation.ROUTE_CONTACT_US
 import com.example.e_library.navigation.ROUTE_DASHBOARD
 import com.example.e_library.navigation.ROUTE_EULA_GUEST
 import com.example.e_library.navigation.ROUTE_HOME
+import com.example.e_library.navigation.ROUTE_MAP
 import com.example.e_library.navigation.ROUTE_PRIVACY_POLICY_GUEST
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_GUEST
 import com.example.e_library.ui.theme.ELibraryTheme
@@ -92,11 +94,22 @@ fun DashboardScreen(navController: NavController){
                 textAlign = TextAlign.Center
 
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Button(onClick = { navController.navigate(ROUTE_MAP) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+            ) {
+                Text(
+                    text = "Map"
+                )
+            }
+            Spacer(modifier = Modifier.height(5.dp))
             Image(
                 painter = painterResource(id = R.drawable.dashboard_image),
                 contentDescription = null,
-                modifier = Modifier.size(250.dp),
+                modifier = Modifier.size(210.dp),
                 contentScale = ContentScale.Crop
             )
             Button(

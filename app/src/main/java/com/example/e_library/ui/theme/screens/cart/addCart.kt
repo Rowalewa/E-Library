@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,12 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.e_library.R
 import com.example.e_library.data.DeliveryViewModel
 import com.example.e_library.models.Books
 import com.example.e_library.models.Clients
@@ -144,24 +148,64 @@ fun AddCartScreen(
     }
 
 
-    val deliveryLocationList = listOf(
-        DeliveryLocation("Ngara", 1.7),
-        DeliveryLocation("Nairobi Hill", 1.9),
-        DeliveryLocation("Nairobi West", 1.9),
-        DeliveryLocation("Jeevanjee", 1.9),
-        DeliveryLocation("Riverside Park", 2.0),
-        DeliveryLocation("Kariokor", 2.1),
-        DeliveryLocation("Madaraka", 2.5),
-        DeliveryLocation("Pangani", 2.6),
-        DeliveryLocation("Westlands", 2.6),
-        DeliveryLocation("Bahati", 3.7),
-        DeliveryLocation("Ruaka", 10.0)
+    val locations = listOf(
+        DeliveryLocation("Westlands", 4.5, -1.2635, 36.8021),
+        DeliveryLocation("Buruburu", 7.8, -1.2870, 36.8697),
+        DeliveryLocation("Kileleshwa", 3.9, -1.2921, 36.7684),
+        DeliveryLocation("Lang'ata", 7.9, -1.3395, 36.7682),
+        DeliveryLocation("Karen", 10.2, -1.3267, 36.7111),
+        DeliveryLocation("Lavington", 4.9, -1.2725, 36.7789),
+        DeliveryLocation("Parklands", 3.6, -1.2623, 36.8116),
+        DeliveryLocation("South B", 5.9, -1.3121, 36.8226),
+        DeliveryLocation("Eastleigh", 7.3, -1.2734, 36.8422),
+        DeliveryLocation("Ngong Road", 6.2, -1.3019, 36.7474),
+        DeliveryLocation("Rongai", 19.4, -1.3951, 36.7447),
+        DeliveryLocation("Kasarani", 11.5, -1.2244, 36.9053),
+        DeliveryLocation("Donholm", 9.3, -1.2977, 36.8914),
+        DeliveryLocation("Thika Road", 9.7, -1.1958, 36.9318),
+        DeliveryLocation("Mombasa Road", 15.7, -1.3601, 36.8982),
+        DeliveryLocation("Ruaka", 12.3, -1.1974, 36.7672),
+        DeliveryLocation("Juja", 23.5, -1.1082, 37.0158),
+        DeliveryLocation("Kahawa", 15.2, -1.1807, 36.9279),
+        DeliveryLocation("Kiambu Road", 10.3, -1.2322, 36.8349),
+        DeliveryLocation("Githurai", 11.9, -1.2082, 36.9024)
     )
+
+//    val locations = listOf(
+//        DeliveryLocation("Westlands", -1.2635, 36.8021).apply {
+//            val (distance, price) = calculateRoadDistanceAndPriceFromCbd(cbdLatitude, cbdLongitude)
+//            deliveryLocationDistanceInKm = distance
+//            deliveryLocationPrice = price
+//        },
+//        DeliveryLocation("Buruburu", -1.2870, 36.8697).apply {
+//            val (distance, price) = calculateRoadDistanceAndPriceFromCbd(cbdLatitude, cbdLongitude)
+//            deliveryLocationDistanceInKm = distance
+//            deliveryLocationPrice = price
+//        },
+//        DeliveryLocation("Kileleshwa", -1.2921, 36.7684).apply {
+//            val (distance, price) = calculateRoadDistanceAndPriceFromCbd(cbdLatitude, cbdLongitude)
+//            deliveryLocationDistanceInKm = distance
+//            deliveryLocationPrice = price
+//        },
+//        DeliveryLocation("Lang'ata", -1.3395, 36.7682).apply {
+//            val (distance, price) = calculateRoadDistanceAndPriceFromCbd(cbdLatitude, cbdLongitude)
+//            deliveryLocationDistanceInKm = distance
+//            deliveryLocationPrice = price
+//        },
+//        DeliveryLocation("Karen", -1.3267, 36.7111).apply {
+//            val (distance, price) = calculateRoadDistanceAndPriceFromCbd(cbdLatitude, cbdLongitude)
+//            deliveryLocationDistanceInKm = distance
+//            deliveryLocationPrice = price
+//        },
+//        // Add the remaining locations using the same pattern
+//    )
+
+
     var isDeliveryLocationExpanded by remember {
         mutableStateOf(false)
     }
     val deliveryLocation by remember {
-        mutableStateOf(deliveryLocationList[0])
+        mutableStateOf(locations[0])
     }
 
     var mCartOrderLocationName by remember {
@@ -235,12 +279,12 @@ fun AddCartScreen(
     })
 
     Box {
-//        Image(
-//            painter = ,
-//            contentDescription = ,
-//            modifier = Modifier.matchParentSize(),
-//            contentScale = ContentScale.FillBounds
-//        )
+        Image(
+            painter = painterResource(id = R.drawable.add_cart),
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.FillBounds
+        )
         Column {
             Box (
                 contentAlignment = Alignment.TopCenter,
@@ -461,7 +505,7 @@ fun AddCartScreen(
                             expanded = isDeliveryLocationExpanded,
                             onDismissRequest = { isDeliveryLocationExpanded = false }
                         ) {
-                            deliveryLocationList.forEach { location ->
+                            locations.forEach { location ->
                                 DropdownMenuItem(
                                     text = { Text(text = location.deliveryLocationName) },
                                     onClick = {

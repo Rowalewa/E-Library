@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -61,8 +69,8 @@ fun ViewBooksAddedToCart(navController: NavHostController, clientId: String){
 
     Box{
         Image(
-            painter = painterResource(id = R.drawable.view_my_borrowed_books),
-            contentDescription = "View Client Wallpaper",
+            painter = painterResource(id = R.drawable.view_cart_client),
+            contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
         )
@@ -76,9 +84,56 @@ fun ViewBooksAddedToCart(navController: NavHostController, clientId: String){
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                var searchText by remember { mutableStateOf("") }
+                Row(
+                    modifier = Modifier
+                        .border(
+                            width = Dp.Hairline,
+                            shape = CutCornerShape(10.dp),
+                            color = Color.Black
+                        )
+                        .background(color = Color.Cyan, shape = CutCornerShape(10.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        label = { Text("Search") },
+                        modifier = Modifier.padding(
+                            start = 10.dp,
+                            end = 0.dp,
+                            top = 2.dp,
+                            bottom = 5.dp
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Red,
+                            unfocusedContainerColor = Color.White,
+                            focusedLabelColor = Color.Black ,
+                            unfocusedLabelColor = Color.DarkGray,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Magenta
+                        )
+                    )
+                    IconButton(onClick = { searchText = "" }) {
+                        Icon(
+                            Icons.Filled.Clear,
+                            contentDescription = "Clear Search",
+                            tint = Color.Red
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
-                    items(cartOrdersBooks) { cart ->
+                    val filteredCart = cartOrdersBooks.filter {
+                        it.cartOrderBookTitle.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderBookGenre.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderBookAuthor.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderBookPublisher.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderBookISBNNumber.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderLocationName.contains(searchText, ignoreCase = true) ||
+                        it.cartOrderStatus.contains(searchText, ignoreCase = true)
+                    }
+                    items(filteredCart) { cart ->
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             BookCartItems(
                                 bookId = cart.cartOrderBookId,
@@ -299,6 +354,15 @@ fun BookCartItems(
             )
             when (cartOrderStatus) {
                 "Ordered" -> {
+                    Text(
+                        text = "Changed your mind? \uD83D\uDC47",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
                     Button(
                         onClick = {
                             val deliveryViewModel = DeliveryViewModel(navController, context)
@@ -316,9 +380,9 @@ fun BookCartItems(
                         )
                     }
                 }
-                "Delivered" -> {
+                "Depot Delivery" -> {
                     Text(
-                        text = "The order was delivered successfully, Delete?",
+                        text = "Delivery in progress to pickup point. Please wait for arrival \uD83D\uDE09",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         fontSize = 25.sp,
@@ -326,18 +390,54 @@ fun BookCartItems(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
-                    Button(onClick = {
-                        navController.navigate("$ROUTE_CLIENT_VIEW_MY_DELIVERY/$clientId")
-                    },
+                }
+                "Depot Delivered" -> {
+                    Text(
+                        text = "The book was delivered successfully to pickup point. Please go for it.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text(text = "Delete")
-                    }
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Depot Returned" -> {
+                    Text(
+                        text = "The order was returned successfully to pickup point. Hopefully you enjoyed reading $cartOrderBookTitle.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Library Delivery"-> {
+                    Text(
+                        text = "The order is in delivery to the library.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Library Returned"-> {
+                    Text(
+                        text = "The book was delivered to the library. Thank you for your cooperation $cartOrderClientFullName \uD83E\uDD17.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
                 }
                 else -> {
                     Text(
-                        text = "Please wait for arrival \uD83D\uDE09",
+                        text = "Invalid Status? We are taking care of it \uD83D\uDE0A.",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         fontSize = 25.sp,

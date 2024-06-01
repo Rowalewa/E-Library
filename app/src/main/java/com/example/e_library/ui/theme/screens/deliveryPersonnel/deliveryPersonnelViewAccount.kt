@@ -138,8 +138,9 @@ fun DeliveryPersonnelViewAccount(navController: NavHostController, deliveryPerso
     Box(
         modifier = Modifier.fillMaxSize()
     ){
-        Image(painter = painterResource(id = R.drawable.admin_view_account),
-            contentDescription = "View Staff Wallpaper",
+        Image(
+            painter = painterResource(id = R.drawable.delivery_personnel_view_account),
+            contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
         )

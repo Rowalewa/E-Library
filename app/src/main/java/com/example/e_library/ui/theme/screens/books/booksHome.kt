@@ -74,6 +74,7 @@ import com.example.e_library.navigation.ROUTE_STAFF_FEEDBACK
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_STAFF
 import com.example.e_library.navigation.ROUTE_VIEW_ALL_BOOKS
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENTS
+import com.example.e_library.navigation.ROUTE_VIEW_DELIVERY_PERSONNEL_STAFF
 import com.example.e_library.navigation.ROUTE_VIEW_STAFF_INFO
 import com.example.e_library.ui.theme.ELibraryTheme
 import com.google.firebase.auth.FirebaseAuth
@@ -309,6 +310,12 @@ fun BooksHomeScreen(navController: NavController, staffId: String){
                             Text(text = "\uD83D\uDEB6 Sign Out \uD83D\uDEB6\u200D♀\uFE0F")
                         }
                     }
+                    Button(
+                        onClick = { navController.navigate("$ROUTE_VIEW_DELIVERY_PERSONNEL_STAFF/$staffId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "View Delivery Personnel")
+                    }
                 }
                 Spacer(modifier = Modifier.height(150.dp))
             }
@@ -402,7 +409,6 @@ fun StaffAppTopBar(navController: NavController, staffId: String){
                     onClick = {
                         val myLogout = AuthViewModel(navController, context)
                         myLogout.stafflogout()
-                        Toast.makeText(context, "You have clicked sign out option: $staffId", Toast.LENGTH_LONG).show()
                     }
                 )
                 // Add more DropdownMenuItem for other account options

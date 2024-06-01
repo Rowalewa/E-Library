@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,7 +29,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -53,6 +57,7 @@ import com.example.e_library.R
 import com.example.e_library.data.DeliveryViewModel
 import com.example.e_library.models.CartOrder
 import com.example.e_library.models.Delivery
+import com.example.e_library.navigation.ROUTE_DELIVERY_RETURN_CONFIRM
 import com.example.e_library.ui.theme.Purple40
 import com.example.e_library.ui.theme.PurpleGrey80
 import com.example.e_library.ui.theme.screens.borrowing.ClientAppTopBar
@@ -78,8 +83,8 @@ fun CourierViewClientDelivery(
 
     Box{
         Image(
-            painter = painterResource(id = R.drawable.view_my_borrowed_books),
-            contentDescription = "View Client Wallpaper",
+            painter = painterResource(id = R.drawable.view_delivery_for_client_as_delivery_personnel),
+            contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
         )
@@ -93,9 +98,59 @@ fun CourierViewClientDelivery(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                var searchText by remember { mutableStateOf("") }
+                Row(
+                    modifier = Modifier
+                        .border(
+                            width = Dp.Hairline,
+                            shape = CutCornerShape(10.dp),
+                            color = Color.Black
+                        )
+                        .background(color = Color.Cyan, shape = CutCornerShape(10.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        label = { Text("Search") },
+                        modifier = Modifier.padding(
+                            start = 10.dp,
+                            end = 0.dp,
+                            top = 2.dp,
+                            bottom = 5.dp
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Red,
+                            unfocusedContainerColor = Color.White,
+                            focusedLabelColor = Color.Black ,
+                            unfocusedLabelColor = Color.DarkGray,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Magenta
+                        )
+                    )
+                    IconButton(onClick = { searchText = "" }) {
+                        Icon(
+                            Icons.Filled.Clear,
+                            contentDescription = "Clear Search",
+                            tint = Color.Red
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(5.dp))
                 LazyColumn {
-                    items(deliveryDetails) { deliveryIt ->
+                    val filteredDelivery = deliveryDetails.filter {
+                        it.deliveryBookTitle.contains(searchText, ignoreCase = true) ||
+                                it.deliveryBookGenre.contains(searchText, ignoreCase = true) ||
+                                it.deliveryBookAuthor.contains(searchText, ignoreCase = true) ||
+                                it.deliveryBookPublisher.contains(searchText, ignoreCase = true) ||
+                                it.deliveryBookISBNNumber.contains(searchText, ignoreCase = true) ||
+                                it.deliveryLocationName.contains(searchText, ignoreCase = true) ||
+                                it.deliveryPersonnelFullName.contains(searchText, ignoreCase = true) ||
+                                it.deliveryPersonnelEmailAddress.contains(searchText, ignoreCase = true) ||
+                                it.deliveryPersonnelPhoneNumber.contains(searchText, ignoreCase = true)
+                                it.deliveryCartOrderStatus.contains(searchText, ignoreCase = true)
+                    }
+                    items(filteredDelivery) { deliveryIt ->
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             DeliveryItemsCourier(
                                 deliveryId = deliveryIt.deliveryId,
@@ -126,6 +181,9 @@ fun CourierViewClientDelivery(
                                 deliveryCartOrderId = deliveryIt.deliveryCartOrderId,
                                 deliveryDepartureDate = deliveryIt.deliveryDepartureDate,
                                 deliveryArrivalDate = deliveryIt.deliveryArrivalDate,
+                                deliveryClientDeliveredDate = deliveryIt.deliveryClientDeliveredDate,
+                                deliverySetReturnDate = deliveryIt.deliverySetReturnDate,
+                                deliveryReturnDate = deliveryIt.deliveryReturnDate,
                                 navController
                             )
 //
@@ -174,6 +232,9 @@ fun DeliveryItemsCourier(
     deliveryCartOrderId: String,
     deliveryDepartureDate: String,
     deliveryArrivalDate: String,
+    deliveryClientDeliveredDate: String,
+    deliverySetReturnDate: String,
+    deliveryReturnDate: String,
     navController: NavHostController
 ) {
     val context = LocalContext.current
@@ -450,37 +511,137 @@ fun DeliveryItemsCourier(
                         textAlign = TextAlign.Center
                     )
                 }
-            }
-            if (deliveryCartOrderStatus != "Delivered") {
-                Button(
-                    onClick = {
-                        val deliveryViewModel = DeliveryViewModel(navController, context)
-                        deliveryViewModel.deliveryCourierApproval(
-                            deliveryClientId,
-                            deliveryCartOrderId,
-                            deliveryId,
-                            deliveryPersonnelId
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
-                ) {
-                    Text(text = "Delivered")
+                if (deliveryClientDeliveredDate.isBlank()) {
+                    Text(
+                        text = "Client Delivered Date: \n Not Picked by $deliveryClientFullName",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    Text(
+                        text = "Client Delivered Date: \n $deliveryClientDeliveredDate",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
                 }
-            }else{
-                Text(
-                    text = "The order was delivered successfully, Delete?",
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    color = Color.Magenta,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Delete")
+                if (deliverySetReturnDate.isBlank()){
+                    Text(
+                        text = "Delivery Set Return Date: \n Not Set",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.White),
+                        textAlign = TextAlign.Center
+                    )
+                }else{
+                    Text(
+                        text = "Delivery Set Return Date: \n $deliverySetReturnDate",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.White),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (deliveryReturnDate.isBlank()){
+                    Text(
+                        text = "Delivery Return Date: \n Not returned",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }else{
+                    Text(
+                        text = "Delivery Return Date: \n $deliveryReturnDate",
+                        color = Color.Black,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            when (deliveryCartOrderStatus) {
+                "Depot Delivery" -> {
+                    Text(
+                        text = "The order is in delivery to pickup point. Travel safely $deliveryPersonnelFullName",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Depot Delivered" -> {
+                    Text(
+                        text = "The order was delivered successfully to pickup point.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Client Delivered" -> {
+                    Text(
+                        text = "Client has the book. Well done.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Depot Returned" -> {
+                    Text(
+                        text = "The order was returned to depot successfully. Please go for it $deliveryPersonnelFullName",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Library Delivery" -> {
+                    Text(
+                        text = "The order is under delivery to library. Travel Safely.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                "Library Returned" -> {
+                    Text(
+                        text = "The order was returned to library successfully. Thank you for your service $deliveryPersonnelFullName.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                else ->{
+                    Text(
+                        text = "Invalid status? We are taking care of it.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = Color.Magenta,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

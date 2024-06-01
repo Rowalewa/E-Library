@@ -1,5 +1,7 @@
 package com.example.e_library.ui.theme.screens.splash
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,15 +18,22 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.e_library.R
 import com.example.e_library.data.AuthViewModel
+import com.example.e_library.navigation.ROUTE_ADMIN_EDIT_HOME
+import com.example.e_library.navigation.ROUTE_ATTENDANT_HOME
+import com.example.e_library.navigation.ROUTE_BOOKS_HOME
+import com.example.e_library.navigation.ROUTE_BORROW_HOME
 import com.example.e_library.navigation.ROUTE_DASHBOARD
+import com.example.e_library.navigation.ROUTE_DELIVERY_PERSONNEL_HOME
 import com.example.e_library.navigation.ROUTE_HOME
 import com.example.e_library.navigation.ROUTE_SPLASH
 import kotlinx.coroutines.delay
@@ -33,10 +42,12 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     navController: NavController
 ) {
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
     var count by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
+    val context = LocalContext.current
+    val authViewModel = AuthViewModel(navController, context)
 
     var startAnimation by remember { mutableStateOf(false) }
     val alphaAnim = animateFloatAsState(
@@ -44,6 +55,9 @@ fun SplashScreen(
         animationSpec = tween(durationMillis = 3000),
         label = "Animation"
     )
+    var startDestination by remember {
+        mutableStateOf(ROUTE_SPLASH)
+    }
 
     LaunchedEffect(key1 = true) {
         while (progress < 1f && count < 100) {
@@ -53,8 +67,27 @@ fun SplashScreen(
             startAnimation = true
         }
         delay(3000) // Display splash screen for 3 seconds
-        navController.navigate(ROUTE_DASHBOARD) {
-            popUpTo(ROUTE_SPLASH) { inclusive = true }
+        if (authViewModel.checkLoginState(context)) {
+            val userType = authViewModel.getUserType(context)
+            val userId = authViewModel.getUserId(context)
+            if (authViewModel.isInternetAvailable(context)) {
+                startDestination = when (userType) {
+                    "Client" -> "$ROUTE_BORROW_HOME/$userId"
+                    "Admin" -> "$ROUTE_ADMIN_EDIT_HOME/$userId"
+                    "Staff" -> "$ROUTE_BOOKS_HOME/$userId"
+                    "DeliveryPersonnel" -> "$ROUTE_DELIVERY_PERSONNEL_HOME/$userId"
+                    "Attendant" -> "$ROUTE_ATTENDANT_HOME/$userId"
+                    else -> ROUTE_DASHBOARD
+                }
+                navController.navigate(startDestination)
+                Log.d("E-Library", "Navigating to $startDestination")
+                Toast.makeText(context, "Welcome back $userType \uD83E\uDD17", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(context, "No internet connection. Please check your connection.", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            Toast.makeText(context, "Welcome", Toast.LENGTH_LONG).show()
+            navController.navigate(ROUTE_DASHBOARD)
         }
     }
 

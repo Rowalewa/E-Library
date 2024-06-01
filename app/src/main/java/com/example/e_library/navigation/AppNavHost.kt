@@ -3,16 +3,19 @@ package com.example.e_library.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.e_library.ui.theme.screens.about.AboutScreenAdmin
+import com.example.e_library.ui.theme.screens.about.AboutScreenAttendant
 import com.example.e_library.ui.theme.screens.about.AboutScreenClient
 import com.example.e_library.ui.theme.screens.about.AboutScreenDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.about.AboutScreenGuest
 import com.example.e_library.ui.theme.screens.about.AboutScreenStaff
+import com.example.e_library.ui.theme.screens.admin.AdminAttendantEdit
 import com.example.e_library.ui.theme.screens.admin.AdminClientEdit
 import com.example.e_library.ui.theme.screens.admin.AdminDeliveryPersonnelEdit
 import com.example.e_library.ui.theme.screens.admin.AdminEditAccount
@@ -21,6 +24,11 @@ import com.example.e_library.ui.theme.screens.admin.AdminLogInScreen
 import com.example.e_library.ui.theme.screens.admin.AdminRegisterScreen
 import com.example.e_library.ui.theme.screens.admin.AdminStaffEdit
 import com.example.e_library.ui.theme.screens.admin.AdminViewAccount
+import com.example.e_library.ui.theme.screens.attendant.AttendantEditAccount
+import com.example.e_library.ui.theme.screens.attendant.AttendantHome
+import com.example.e_library.ui.theme.screens.attendant.AttendantLogin
+import com.example.e_library.ui.theme.screens.attendant.AttendantRegister
+import com.example.e_library.ui.theme.screens.attendant.AttendantViewAccount
 import com.example.e_library.ui.theme.screens.books.AddBooksScreen
 import com.example.e_library.ui.theme.screens.books.BooksHomeScreen
 import com.example.e_library.ui.theme.screens.books.EditBooksScreen
@@ -43,6 +51,7 @@ import com.example.e_library.ui.theme.screens.clients.ClientRegisterScreen
 import com.example.e_library.ui.theme.screens.clients.EditClientInfo
 import com.example.e_library.ui.theme.screens.clients.ViewAllBooksClient
 import com.example.e_library.ui.theme.screens.clients.ViewClientInfo
+import com.example.e_library.ui.theme.screens.contact.AttendantContactDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.contact.ContactDeliveryPersonnelAsAdmin
 import com.example.e_library.ui.theme.screens.contact.ContactDeliveryPersonnelAsClient
 import com.example.e_library.ui.theme.screens.contact.ContactDeliveryPersonnelAsDeliveryPersonnel
@@ -52,7 +61,10 @@ import com.example.e_library.ui.theme.screens.contact.ContactStaffAsClient
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.contact.ContactStaffAsStaff
 import com.example.e_library.ui.theme.screens.contact.ContactUsScreen
+import com.example.e_library.ui.theme.screens.contact.StaffContactAsAttendant
 import com.example.e_library.ui.theme.screens.dashboard.DashboardScreen
+import com.example.e_library.ui.theme.screens.delivery.AttendantViewClientDelivery
+import com.example.e_library.ui.theme.screens.delivery.AttendantViewClients
 import com.example.e_library.ui.theme.screens.delivery.ClientViewMyDelivery
 import com.example.e_library.ui.theme.screens.delivery.CourierViewClientDelivery
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelEditAccount
@@ -60,22 +72,35 @@ import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonne
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelLoginScreen
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelRegisterScreen
 import com.example.e_library.ui.theme.screens.deliveryPersonnel.DeliveryPersonnelViewAccount
+import com.example.e_library.ui.theme.screens.deliveryReturn.DeliveryReturnConfirm
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryPersonnelAttendant
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryPersonnelClient
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryPersonnelStaff
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryReturnAttendant
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryReturnClient
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryReturnDeliveryPersonnel
+import com.example.e_library.ui.theme.screens.deliveryReturn.ViewDeliveryReturnStaff
+import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.AttendantEULA
 import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.EndUserLicenceAgreementScreenAdmin
 import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.EndUserLicenceAgreementScreenClient
 import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.EndUserLicenceAgreementScreenDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.EndUserLicenceAgreementScreenGuest
 import com.example.e_library.ui.theme.screens.endUserLicenceAgreement.EndUserLicenceAgreementScreenStaff
+import com.example.e_library.ui.theme.screens.feedback.AttendantFeedbackScreen
 import com.example.e_library.ui.theme.screens.feedback.FeedbackScreenAdmin
 import com.example.e_library.ui.theme.screens.feedback.FeedbackScreenClient
 import com.example.e_library.ui.theme.screens.feedback.FeedbackScreenDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.feedback.FeedbackScreenStaff
 import com.example.e_library.ui.theme.screens.home.HomeScreen
 import com.example.e_library.ui.theme.screens.home.ViewBooksGuest
+import com.example.e_library.ui.theme.screens.map.GoogleMapView
+import com.example.e_library.ui.theme.screens.privacyPolicy.AttendantPrivacyPolicy
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenAdmin
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenClient
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenDeliveryPersonnel
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenGuest
 import com.example.e_library.ui.theme.screens.privacyPolicy.PrivacyPolicyScreenStaff
+import com.example.e_library.ui.theme.screens.returning.LibraryDeliveryReturn
 import com.example.e_library.ui.theme.screens.returning.ReturnBooksScreen
 import com.example.e_library.ui.theme.screens.splash.SplashScreen
 import com.example.e_library.ui.theme.screens.staff.EditStaffInfo
@@ -83,6 +108,7 @@ import com.example.e_library.ui.theme.screens.staff.StaffHomeScreen
 import com.example.e_library.ui.theme.screens.staff.StaffLogInScreen
 import com.example.e_library.ui.theme.screens.staff.StaffRegisterScreen
 import com.example.e_library.ui.theme.screens.staff.ViewStaffInfo
+import com.example.e_library.ui.theme.screens.userManual.AttendantUserManual
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenAdmin
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenClient
 import com.example.e_library.ui.theme.screens.userManual.UserManualScreenDeliveryPersonnel
@@ -91,14 +117,15 @@ import com.example.e_library.ui.theme.screens.userManual.UserManualScreenStaff
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavHost(
-    modifier: Modifier = Modifier,
-               navController: NavHostController = rememberNavController(),
-               startDestination: String
-) {
+fun AppNavHost() {
+    val navController = rememberNavController()
+
+    val startDestination by remember {
+        mutableStateOf(ROUTE_SPLASH)
+    }
+
     NavHost(
         navController = navController,
-        modifier = modifier,
         startDestination = startDestination
     ){
         composable(ROUTE_SPLASH){
@@ -132,6 +159,9 @@ fun AppNavHost(
         }
         composable("$ROUTE_ADMIN_EDIT_ACCOUNT/{adminId}"){ passedData->
             passedData.arguments?.getString("adminId")?.let { AdminEditAccount(navController, it) }
+        }
+        composable("$ROUTE_ADMIN_ATTENDANT_EDIT/{adminId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AdminAttendantEdit(navController, it) }
         }
         composable("$ROUTE_ADD_BOOKS/{staffId}"){passedData->
             passedData.arguments?.getString("staffId")?.let { AddBooksScreen(navController, it) }
@@ -252,6 +282,10 @@ fun AppNavHost(
         composable("$ROUTE_ADMIN_FEEDBACK/{adminId}"){ passedData->
             passedData.arguments?.getString("adminId")?.let { FeedbackScreenAdmin(navController, it) }
         }
+        composable("$ROUTE_ATTENDANT_FEEDBACK/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantFeedbackScreen(navController, it ) }
+
+        }
         composable("$ROUTE_DELIVERY_PERSONNEL_FEEDBACK/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")?.let { FeedbackScreenDeliveryPersonnel(navController, it) }
         }
@@ -266,6 +300,9 @@ fun AppNavHost(
         }
         composable("$ROUTE_ABOUT_SCREEN_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")?.let { AboutScreenDeliveryPersonnel(navController, it) }
+        }
+        composable("$ROUTE_ABOUT_SCREEN_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AboutScreenAttendant(navController, it) }
         }
         composable(ROUTE_ABOUT_SCREEN_GUEST){
             AboutScreenGuest(navController)
@@ -282,6 +319,9 @@ fun AppNavHost(
         composable("$ROUTE_STAFF_CONTACT_AS_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")?.let { ContactStaffAsDeliveryPersonnel(navController, it) }
         }
+        composable("$ROUTE_STAFF_CONTACT_AS_ATTENDANT/{attendantId}"){ passedData->
+            passedData.arguments?.getString("attendantId")?.let { StaffContactAsAttendant(navController, it) }
+        }
         composable("$ROUTE_DELIVERY_PERSONNEL_CONTACT_AS_CLIENT/{clientId}"){ passedData->
             passedData.arguments?.getString("clientId")?.let { ContactDeliveryPersonnelAsClient(navController, it) }
         }
@@ -293,6 +333,9 @@ fun AppNavHost(
         }
         composable("$ROUTE_DELIVERY_PERSONNEL_CONTACT_AS_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")?.let { ContactDeliveryPersonnelAsDeliveryPersonnel(navController, it) }
+        }
+        composable("$ROUTE_DELIVERY_PERSONNEL_CONTACT_AS_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantContactDeliveryPersonnel(navController, it) }
         }
         composable(ROUTE_CONTACT_US){
             ContactUsScreen(navController)
@@ -311,6 +354,9 @@ fun AppNavHost(
         composable("$ROUTE_EULA_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")
                 ?.let { EndUserLicenceAgreementScreenDeliveryPersonnel(navController, it) }
+        }
+        composable("$ROUTE_EULA_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantEULA(navController, it) }
         }
         composable(ROUTE_EULA_GUEST){
             EndUserLicenceAgreementScreenGuest(navController)
@@ -331,6 +377,9 @@ fun AppNavHost(
             passedData.arguments?.getString("deliveryPersonnelId")
                 ?.let { PrivacyPolicyScreenDeliveryPersonnel(navController, it) }
         }
+        composable("$ROUTE_PRIVACY_POLICY_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantPrivacyPolicy( navController,it ) }
+        }
         composable(ROUTE_PRIVACY_POLICY_GUEST){
             PrivacyPolicyScreenGuest(navController)
         }
@@ -349,6 +398,9 @@ fun AppNavHost(
         composable("$ROUTE_USER_MANUAL_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){ passedData->
             passedData.arguments?.getString("deliveryPersonnelId")
                 ?.let { UserManualScreenDeliveryPersonnel(navController, it) }
+        }
+        composable("$ROUTE_USER_MANUAL_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantUserManual( navController,it ) }
         }
         composable(ROUTE_USER_MANUAL_GUEST){
             UserManualScreenGuest(navController)
@@ -429,6 +481,91 @@ fun AppNavHost(
                 navController,
                 passedData.arguments?.getString("clientId")!!,
                 passedData.arguments?.getString("deliveryPersonnelId")!!
+            )
+        }
+        composable(ROUTE_MAP){
+            GoogleMapView(navController)
+        }
+        composable("$ROUTE_ATTENDANT_EDIT_ACCOUNT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantEditAccount(navController, it) }
+        }
+        composable("$ROUTE_ATTENDANT_HOME/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantHome(navController, it) }
+        }
+        composable(ROUTE_ATTENDANT_LOGIN){
+            AttendantLogin(navController)
+        }
+        composable(ROUTE_ATTENDANT_REGISTER){
+            AttendantRegister(navController)
+        }
+        composable("$ROUTE_ATTENDANT_VIEW_ACCOUNT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantViewAccount(navController, it) }
+        }
+        composable("$ROUTE_ATTENDANT_VIEW_CLIENTS/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { AttendantViewClients(navController,it) }
+        }
+        composable("$ROUTE_ATTENDANT_VIEW_CLIENT_DELIVERY/{attendantId}/{clientId}"){passedData->
+            AttendantViewClientDelivery(
+                navController,
+                passedData.arguments?.getString("attendantId")!!,
+                passedData.arguments?.getString("clientId")!!
+            )
+        }
+        composable("$ROUTE_DELIVERY_RETURN_CONFIRM/{attendantId}/{deliveryPersonnelId}/{deliveryCartOrderId}/{deliveryId}/{clientId}/{bookId}"){passedData->
+            DeliveryReturnConfirm(
+                navController,
+                passedData.arguments?.getString("attendantId")!!,
+                passedData.arguments?.getString("deliveryPersonnelId")!!,
+                passedData.arguments?.getString("deliveryCartOrderId")!!,
+                passedData.arguments?.getString("deliveryId")!!,
+                passedData.arguments?.getString("clientId")!!,
+                passedData.arguments?.getString("bookId")!!
+            )
+        }
+        composable("$ROUTE_VIEW_DELIVERY_RETURN_CLIENT/{deliveryPersonnelId}/{clientId}"){passedData->
+            ViewDeliveryReturnClient(
+                navController,
+                passedData.arguments?.getString("deliveryPersonnelId")!!,
+                passedData.arguments?.getString("clientId")!!
+            )
+        }
+        composable("$ROUTE_VIEW_DELIVERY_RETURN_DELIVERY_PERSONNEL/{deliveryPersonnelId}"){passedData->
+            passedData.arguments?.getString("deliveryPersonnelId")?.let { ViewDeliveryReturnDeliveryPersonnel(navController,it) }
+        }
+        composable("$ROUTE_VIEW_DELIVERY_RETURN_ATTENDANT/{deliveryPersonnelId}/{attendantId}"){passedData->
+            ViewDeliveryReturnAttendant(
+                navController,
+                passedData.arguments?.getString("deliveryPersonnelId")!!,
+                passedData.arguments?.getString("attendantId")!!
+            )
+        }
+        composable("$ROUTE_VIEW_DELIVERY_RETURN_STAFF/{deliveryPersonnelId}/{staffId}"){passedData->
+            ViewDeliveryReturnStaff(
+                navController,
+                passedData.arguments?.getString("deliveryPersonnelId")!!,
+                passedData.arguments?.getString("staffId")!!
+            )
+        }
+        composable("$ROUTE_VIEW_DELIVERY_PERSONNEL_ATTENDANT/{attendantId}"){passedData->
+            passedData.arguments?.getString("attendantId")?.let { ViewDeliveryPersonnelAttendant( navController,it ) }
+        }
+        composable("$ROUTE_VIEW_DELIVERY_PERSONNEL_CLIENT/{clientId}"){passedData->
+            passedData.arguments?.getString("clientId")?.let { ViewDeliveryPersonnelClient( navController,it ) }
+        }
+        composable("$ROUTE_VIEW_DELIVERY_PERSONNEL_STAFF/{staffId}"){passedData->
+            passedData.arguments?.getString("staffId")?.let { ViewDeliveryPersonnelStaff( navController,it ) }
+        }
+        composable("$ROUTE_LIBRARY_DELIVERY_RETURN/{staffId}/{deliveryPersonnelId}/{attendantId}/{clientId}/{deliveryReturnId}/{deliveryId}/{deliveryCartOrderId}/{bookId}"){passedData->
+            LibraryDeliveryReturn(
+                navController,
+                passedData.arguments?.getString("staffId")!!,
+                passedData.arguments?.getString("deliveryPersonnelId")!!,
+                passedData.arguments?.getString("attendantId")!!,
+                passedData.arguments?.getString("clientId")!!,
+                passedData.arguments?.getString("deliveryReturnId")!!,
+                passedData.arguments?.getString("deliveryId")!!,
+                passedData.arguments?.getString("deliveryCartOrderId")!!,
+                passedData.arguments?.getString("bookId")!!
             )
         }
     }

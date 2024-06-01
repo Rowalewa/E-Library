@@ -14,12 +14,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavController
 import com.example.e_library.models.Admin
+import com.example.e_library.models.Attendant
 import com.example.e_library.models.Clients
 import com.example.e_library.models.DeliveryPersonnel
 import com.example.e_library.models.Staff
 import com.example.e_library.navigation.ROUTE_ADMIN_EDIT_HOME
 import com.example.e_library.navigation.ROUTE_ADMIN_LOGIN
 import com.example.e_library.navigation.ROUTE_ADMIN_REGISTER
+import com.example.e_library.navigation.ROUTE_ATTENDANT_HOME
+import com.example.e_library.navigation.ROUTE_ATTENDANT_LOGIN
+import com.example.e_library.navigation.ROUTE_ATTENDANT_REGISTER
 import com.example.e_library.navigation.ROUTE_BOOKS_HOME
 import com.example.e_library.navigation.ROUTE_BORROW_HOME
 import com.example.e_library.navigation.ROUTE_CLIENT_HOME
@@ -281,6 +285,10 @@ class AuthViewModel (
     fun verifyDeliveryPersonnel(deliveryPersonnelId: String) {
         val deliveryPersonnelRef = FirebaseDatabase.getInstance().getReference("DeliveryPersonnel").child(deliveryPersonnelId)
         deliveryPersonnelRef.child("accountStatus").setValue("Verified")
+    }
+    fun verifyAttendant(attendantId: String) {
+        val attendantRef = FirebaseDatabase.getInstance().getReference("Attendant").child(attendantId)
+        attendantRef.child("accountStatus").setValue("Verified")
     }
 
     fun updateAdmin(
@@ -1216,6 +1224,13 @@ class AuthViewModel (
         Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
     }
 
+    fun attendantLogout(){
+        mAuth.signOut()
+        FirebaseAuth.getInstance().signOut()
+        clearLoginState(context)
+        Toast.makeText(context, "Successfully logged out", Toast.LENGTH_LONG).show()
+    }
+
 //    fun isloggedin(): Boolean{
 //        return mAuth.currentUser != null
 //    } This one checks first if user is logged in or not for him or she to use services
@@ -1294,6 +1309,31 @@ class AuthViewModel (
         return mDeliveryPersonnel
     }
 
+    fun viewAttendant(
+        attendant: MutableState<Attendant>,
+        mAttendant: SnapshotStateList<Attendant>
+    ): SnapshotStateList<Attendant> {
+        val ref = FirebaseDatabase.getInstance().getReference().child("Attendant")
+
+        progress.show()
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                progress.dismiss()
+                mAttendant.clear()
+                for (snap in snapshot.children) {
+                    val value = snap.getValue(Attendant::class.java)
+                    attendant.value = value!!
+                    mAttendant.add(value)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+            }
+        })
+        return mAttendant
+    }
+
     fun deleteDeliveryPersonnel(deliveryPersonnelId: String) {
         val delRef = FirebaseDatabase.getInstance().getReference().child("DeliveryPersonnel/$deliveryPersonnelId")
         progressDelete.show()
@@ -1305,6 +1345,22 @@ class AuthViewModel (
             } else {
                 progressDelete.dismiss()
                 Log.e("Delete Delivery Personnel Account", "Error deleting Delivery Personnel Account", task.exception)
+                Toast.makeText(context, "Error deleting Delivery Personnel Account: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun deleteAttendantRecord(attendantId: String) {
+        val delRef = FirebaseDatabase.getInstance().getReference().child("Attendants/$attendantId")
+        progressDelete.show()
+        delRef.removeValue().addOnCompleteListener {task ->
+            if (task.isSuccessful) {
+                progressDelete.dismiss()
+                Log.d("Delete Attendant Account", "Attendant Account deleted")
+                Toast.makeText(context, "Attendant Account deleted", Toast.LENGTH_SHORT).show()
+            } else {
+                progressDelete.dismiss()
+                Log.e("Delete Attendant Account", "Error deleting Attendant Account", task.exception)
                 Toast.makeText(context, "Error deleting Delivery Personnel Account: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -1671,5 +1727,317 @@ class AuthViewModel (
     fun deliveryStatusUnavailable(deliveryPersonnelId: String) {
         val deliveryPersonnelRef = FirebaseDatabase.getInstance().getReference("DeliveryPersonnel").child(deliveryPersonnelId)
         deliveryPersonnelRef.child("deliveryStatus").setValue("Unavailable")
+    }
+    fun attendantStatusAvailable(attendantId: String) {
+        val attendantRef = FirebaseDatabase.getInstance().getReference("Attendant").child(attendantId)
+        attendantRef.child("accountStatus").setValue("Available")
+    }
+
+    fun attendantStatusUnavailable(attendantId: String) {
+        val attendantRef = FirebaseDatabase.getInstance().getReference("Attendant").child(attendantId)
+        attendantRef.child("accountStatus").setValue("Unavailable")
+    }
+
+    fun attendantSignup(
+        fullName: String,
+        gender: String,
+        maritalStatus: String,
+        phoneNumber: String,
+        dateOfBirth: String,
+        accountStatus: String,
+        email: String,
+        pass: String,
+        confpass: String,
+        attendantProfilePictureUrl: Uri?,
+    ) {
+        progress.show()
+        if (attendantProfilePictureUrl != null) {
+            if (fullName.isBlank() || gender.isBlank() || maritalStatus.isBlank() || phoneNumber.isBlank() || dateOfBirth.isBlank() || email.isBlank() || pass.isBlank() || confpass.isBlank()) {
+                progress.dismiss()
+                Toast.makeText(context, "Fill all the Fields Please \uD83D\uDE42", Toast.LENGTH_LONG).show()
+                return
+            } else if (pass != confpass) {
+                progress.dismiss()
+                Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                navController.navigate(ROUTE_STAFF_REGISTER)
+                return
+            } else if (phoneNumber.length != 10) {
+                progress.dismiss()
+                Toast.makeText(context, "Invalid Phone Number", Toast.LENGTH_LONG).show()
+                return
+            } else {
+                if (isStrongPassword(pass)) {
+                    mAuth.createUserWithEmailAndPassword(email, pass)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val attendantId = System.currentTimeMillis().toString()
+                                val storageRef = FirebaseStorage.getInstance().reference
+                                val profilePicRef = storageRef.child("attendant_profile_pictures/${attendantId}")
+                                profilePicRef.putFile(attendantProfilePictureUrl)
+                                    .addOnSuccessListener { _ ->
+                                        profilePicRef.downloadUrl.addOnSuccessListener { uri ->
+                                            // Once the image is uploaded, save the user data including the image URL
+                                            val attendantProfilePictureUrl = uri.toString()
+                                            val attendantData = Attendant(
+                                                fullName,
+                                                gender,
+                                                maritalStatus,
+                                                phoneNumber,
+                                                dateOfBirth,
+                                                accountStatus,
+                                                attendantProfilePictureUrl,
+                                                email,
+                                                pass,
+                                                attendantId
+                                            )
+                                            val regRef = FirebaseDatabase.getInstance().getReference().child("Attendant").child(attendantId)
+                                            regRef.setValue(attendantData)
+                                                .addOnCompleteListener { dataTask ->
+                                                    if (dataTask.isSuccessful) {
+                                                        progress.dismiss()
+                                                        Toast.makeText(context, "Account Created Successfully, wait for verification", Toast.LENGTH_LONG).show()
+                                                        navController.navigate(ROUTE_ATTENDANT_LOGIN)
+                                                    } else {
+                                                        progress.dismiss()
+                                                        Toast.makeText(context, "${dataTask.exception!!.message}", Toast.LENGTH_LONG).show()
+                                                        navController.navigate(ROUTE_ATTENDANT_REGISTER)
+                                                    }
+                                                }
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        progress.dismiss()
+                                        Toast.makeText(context, "Failed to upload image: ${e.message}", Toast.LENGTH_LONG).show()
+                                    }
+                            } else {
+                                progress.dismiss()
+                                val errorMessage =
+                                    task.exception?.message ?: "Could not Register, Retry"
+                                if (errorMessage.contains("email address is already in use")) {
+                                    Toast.makeText(context, "Email address is already registered", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                                }
+                                navController.navigate(ROUTE_ATTENDANT_REGISTER)
+                            }
+                        }
+                } else {
+                    Toast.makeText(context, "Your password strength is weak, pattern requires at least 8 characters including at least one uppercase letter, one lowercase letter, one digit, and one special character.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }else{
+            progress.dismiss()
+            Toast.makeText(context, "You are required to choose an image and fill in all the fields", Toast.LENGTH_LONG).show()
+            return
+        }
+    }
+
+    fun attendantLogin(
+        email: String,
+        pass: String
+    ){
+        progress.show()
+        if (email.isBlank() || pass.isBlank()){
+            progress.dismiss()
+            Toast.makeText(context, "Please fill in all the fields", Toast.LENGTH_LONG).show()
+        } else {
+            mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener {
+                getAttendantIdAndStatusByEmail(email) { attendantId, accountStatus ->
+                    if (attendantId != null && accountStatus == "Verified") {
+                        if (it.isSuccessful) {
+                            saveLoginState(context, attendantId, "Attendant")
+                            progress.dismiss()
+                            Toast.makeText(context, "Successfully logged in", Toast.LENGTH_LONG).show()
+                            navController.navigate("$ROUTE_ATTENDANT_HOME/$attendantId")
+                        } else {
+                            progress.dismiss()
+                            Toast.makeText(context, "${it.exception!!.message}", Toast.LENGTH_LONG).show()
+                            navController.navigate(ROUTE_ATTENDANT_LOGIN)
+                        }
+                    } else {
+                        if (accountStatus != "Verified") {
+                            progress.dismiss()
+                            Toast.makeText(context, "Account not verified", Toast.LENGTH_LONG).show()
+                        } else {
+                            progress.dismiss()
+                            Toast.makeText(context, "Attendant is null", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getAttendantIdAndStatusByEmail(email: String, callback: (String?, String?) -> Unit) {
+        val ref = FirebaseDatabase.getInstance().getReference().child("Attendant")
+        ref.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (snap in snapshot.children) {
+                        val attendantId = snap.key // Assuming the client ID is the key of the client node
+                        val accountStatus = snap.child("accountStatus").getValue(String::class.java)
+                        callback(attendantId, accountStatus)
+                        return
+                    }
+                }
+                callback(null, null) // Client ID not found
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Attendant", "Error fetching Attendant ID: ${error.message}")
+                callback(null, null) // Handle the error by returning null
+            }
+        })
+    }
+
+    fun updateAttendant(
+        fullName: String,
+        gender: String,
+        maritalStatus: String,
+        phoneNumber: String,
+        dateOfBirth: String,
+        accountStatus: String,
+        email: String,
+        pass: String,
+        confpass: String,
+        attendantId: String,
+        filePath: Uri?
+    ) {
+        progressUpdate.show()
+        val storageReference = FirebaseStorage.getInstance().getReference().child("Attendant/$attendantId")
+        val updateData = Attendant(
+            fullName,
+            gender,
+            maritalStatus,
+            phoneNumber,
+            dateOfBirth,
+            accountStatus,
+            "",
+            email,
+            pass,
+            attendantId
+        )
+
+        // Update book details in Firebase Realtime Database
+        if (filePath != null) {
+            if (pass.isNotBlank()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.updatePassword(pass)?.addOnCompleteListener { passwordUpdateTask ->
+                    if (passwordUpdateTask.isSuccessful) {
+                        if (pass == confpass) {
+                            if (isStrongPassword(pass)) {
+                                val dbRef = FirebaseDatabase.getInstance().getReference().child("Attendant/$attendantId")
+                                dbRef.setValue(updateData).addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // If an image file is provided, update the image in Firebase Storage
+                                        filePath.let { fileUri ->
+                                            storageReference.putFile(fileUri)
+                                                .addOnCompleteListener { storageTask ->
+                                                    if (storageTask.isSuccessful) {
+                                                        progressUpdate.dismiss()
+                                                        storageReference.downloadUrl.addOnSuccessListener { uri ->
+                                                            val imageUrl = uri.toString()
+                                                            updateData.attendantProfilePictureUrl = imageUrl
+                                                            dbRef.setValue(updateData) // Update the book entry with the image URL
+                                                        }
+                                                    } else {
+                                                        progressUpdate.dismiss()
+                                                        Toast.makeText(context, "Upload Failure", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                        }
+
+                                        // Show success message
+                                        progressUpdate.dismiss()
+                                        Toast.makeText(context, "Update successful", Toast.LENGTH_SHORT).show()
+                                        navController.popBackStack()
+                                    } else {
+                                        progressUpdate.dismiss()
+                                        // Handle database update error
+                                        Toast.makeText(context, "ERROR: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else {
+                                progressUpdate.dismiss()
+                                Toast.makeText(context, "Your password strength is weak, pattern requires at least 8 characters including at least one uppercase letter, one lowercase letter, one digit, and one special character.", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        progressUpdate.dismiss()
+                        Toast.makeText(context, "Passwords Update task failure", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }else{
+                progressUpdate.dismiss()
+                Toast.makeText(context, "You cannot set an empty password", Toast.LENGTH_LONG).show()
+                return
+            }
+        } else {
+            progressUpdate.show()
+            if (pass.isNotBlank()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                user?.updatePassword(pass)?.addOnCompleteListener { passwordUpdateTask ->
+                    if (passwordUpdateTask.isSuccessful) {
+                        if (pass == confpass) {
+                            val dbRef = FirebaseDatabase.getInstance().getReference()
+                                .child("Attendant/$attendantId")
+                            dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    val attendant = snapshot.getValue(Attendant::class.java)
+                                    val existingImageUrl = attendant?.attendantProfilePictureUrl ?: ""
+
+                                    val updateData = Attendant(
+                                        fullName,
+                                        gender,
+                                        maritalStatus,
+                                        phoneNumber,
+                                        dateOfBirth,
+                                        accountStatus,
+                                        existingImageUrl,
+                                        email,
+                                        pass,
+                                        attendantId
+                                    )
+
+                                    dbRef.setValue(updateData).addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            // Show success message
+                                            progressUpdate.dismiss()
+                                            Toast.makeText(context, "Update successful", Toast.LENGTH_SHORT).show()
+                                            navController.popBackStack()
+                                        } else {
+                                            // Handle database update error
+                                            progressUpdate.dismiss()
+                                            Toast.makeText(context, "ERROR: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    // Handle database error
+                                    progressUpdate.dismiss()
+                                    Toast.makeText(context, "ERROR: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Success with Image Retained", Toast.LENGTH_LONG).show()
+                        } else {
+                            progressUpdate.dismiss()
+                            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        progressUpdate.dismiss()
+                        Toast.makeText(context, "Password Update Task Failure", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }else{
+                progressUpdate.dismiss()
+                Toast.makeText(context, "You cannot set an empty password", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
     }
 }

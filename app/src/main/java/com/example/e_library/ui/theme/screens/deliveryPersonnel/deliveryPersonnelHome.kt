@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,9 +66,11 @@ import com.example.e_library.navigation.ROUTE_STAFF_CONTACT_AS_DELIVERY_PERSONNE
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_DELIVERY_PERSONNEL
 import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENTS_DELIVERY_PERSONNEL
 import com.example.e_library.navigation.ROUTE_VIEW_DELIVERY_PERSONNEL_ACCOUNT
+import com.example.e_library.navigation.ROUTE_VIEW_DELIVERY_RETURN_DELIVERY_PERSONNEL
 import com.example.e_library.ui.theme.Pink40
 import com.example.e_library.ui.theme.Purple40
 import com.example.e_library.ui.theme.Purple80
+import com.example.e_library.ui.theme.PurpleGrey40
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -111,12 +114,35 @@ fun DeliveryPersonnelHome(navController: NavController, deliveryPersonnelId: Str
                             .padding(10.dp)
                     )
                     Button(onClick = { navController.navigate("$ROUTE_VIEW_CART_CLIENTS_DELIVERY_PERSONNEL/$deliveryPersonnelId") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(10.dp)
                     ) {
                         Text(text = "Clients")
                     }
                 }
+                Spacer(modifier = Modifier.height(15.dp))
+                Card (
+                    colors = CardDefaults.cardColors(containerColor = PurpleGrey40),
+                    border = BorderStroke(1.dp, Color.Yellow),
+                    shape = RoundedCornerShape(20.dp)
+                ){
+                    Image(
+                        painter = painterResource(id = R.drawable.attendant_icon),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    )
+                    Button(onClick = { navController.navigate("$ROUTE_VIEW_DELIVERY_RETURN_DELIVERY_PERSONNEL/$deliveryPersonnelId") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
+                        Text(text = "My Return Details")
+                    }
+                }
+                Spacer(modifier = Modifier.height(150.dp))
             }
         }
         Box (

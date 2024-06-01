@@ -60,6 +60,7 @@ import com.example.e_library.R
 import com.example.e_library.data.AuthViewModel
 import com.example.e_library.models.Admin
 import com.example.e_library.navigation.ROUTE_ABOUT_SCREEN_ADMIN
+import com.example.e_library.navigation.ROUTE_ADMIN_ATTENDANT_EDIT
 import com.example.e_library.navigation.ROUTE_ADMIN_CLIENT_EDIT
 import com.example.e_library.navigation.ROUTE_ADMIN_DELIVERY_PERSONNEL_EDIT
 import com.example.e_library.navigation.ROUTE_ADMIN_EDIT_HOME
@@ -70,6 +71,7 @@ import com.example.e_library.navigation.ROUTE_EULA_ADMIN
 import com.example.e_library.navigation.ROUTE_PRIVACY_POLICY_ADMIN
 import com.example.e_library.navigation.ROUTE_STAFF_CONTACT_AS_ADMIN
 import com.example.e_library.navigation.ROUTE_USER_MANUAL_ADMIN
+import com.example.e_library.ui.theme.PurpleGrey40
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -218,8 +220,25 @@ fun AdminEditHome(navController: NavController, adminId: String){
                         Text(text = "Edit Delivery Personnel")
                     }
                 }
+                Spacer(modifier = Modifier.height(15.dp))
+                Card (
+                    colors = CardDefaults.cardColors(containerColor = PurpleGrey40)
+                ){
+                    Image(
+                        painter = painterResource(id = R.drawable.attendant_icon),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    )
+                    Button(
+                        onClick = { navController.navigate("$ROUTE_ADMIN_ATTENDANT_EDIT/$adminId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "Edit Attendants")
+                    }
+                }
                 Spacer(modifier = Modifier.height(150.dp))
-
             }
         }
         Box (

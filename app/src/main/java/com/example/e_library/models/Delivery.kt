@@ -35,6 +35,9 @@ data class Delivery(
     //___set by the delivery guys_____//
     var deliveryDepartureDate: String = "", // the today of the delivery guy picking it.
     var deliveryArrivalDate: String = "",// the today of the delivery guy reaching pickup point
+    var deliveryClientDeliveredDate: String = "",
+    var deliverySetReturnDate: String = "",
+    var deliveryReturnDate: String = "",
     var deliveryId: String = ""
     //___set by delivery guys____//
     // on delivery pickup, it still stays in cart but the button to remove it is deactivated which means we need a status field in the cart.

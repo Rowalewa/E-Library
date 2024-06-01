@@ -169,5 +169,4 @@ fun FeedbackScreenAdmin(navController: NavHostController, adminId: String) {
             AdminBottomAppBar(navController, adminId)
         }
     }
-
 }

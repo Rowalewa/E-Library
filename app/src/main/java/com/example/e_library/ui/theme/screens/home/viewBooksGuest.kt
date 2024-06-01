@@ -84,8 +84,6 @@ fun ViewBooksGuest(navController: NavHostController){
                         "",
                         "",
                         "",
-                        "",
-                        "",
                         0,
                         ""
                     )
@@ -170,7 +168,6 @@ fun ViewBooksGuest(navController: NavHostController){
                 fun BookItem(
                     bookTitle: String,
                     bookAuthor: String,
-                    bookYearOfPublication: String,
                     bookPrice: String,
                     bookISBNNumber: String,
                     bookPublisher: String,
@@ -180,7 +177,6 @@ fun ViewBooksGuest(navController: NavHostController){
                     bookLanguage: String,
                     bookNumberOfPages: String,
                     bookAcquisitionMethod: String,
-                    bookCondition: String,
                     bookShelfNumber: String,
                     bookSynopsis: String,
                     bookImageUrl: String,
@@ -218,10 +214,6 @@ fun ViewBooksGuest(navController: NavHostController){
                             )
                             Text(
                                 text = "Book Author: $bookAuthor",
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "Book Year of Publication: $bookYearOfPublication",
                                 color = Color.Black
                             )
                             Text(
@@ -265,10 +257,6 @@ fun ViewBooksGuest(navController: NavHostController){
                                 color = Color.Black
                             )
                             Text(
-                                text = "Book Condition: $bookCondition",
-                                color = Color.Black
-                            )
-                            Text(
                                 text = "Book Shelf Number: $bookShelfNumber",
                                 color = Color.Black
                             )
@@ -295,7 +283,6 @@ fun ViewBooksGuest(navController: NavHostController){
                                 it.bookAuthor.contains(searchText, ignoreCase = true) ||
                                 it.bookGenre.contains(searchText, ignoreCase = true) ||
                                 it.bookPublisher.contains(searchText, ignoreCase = true) ||
-                                it.bookCondition.contains(searchText, ignoreCase = true) ||
                                 it.bookAcquisitionMethod.contains(searchText, ignoreCase = true) ||
                                 it.bookEdition.contains(searchText, ignoreCase = true) ||
                                 it.bookISBNNumber.contains(searchText, ignoreCase = true
@@ -305,7 +292,6 @@ fun ViewBooksGuest(navController: NavHostController){
                         BookItem(
                             bookTitle = it.bookTitle,
                             bookAuthor = it.bookAuthor,
-                            bookYearOfPublication = it.bookYearOfPublication,
                             bookPrice = it.bookPrice,
                             bookISBNNumber = it.bookISBNNumber,
                             bookPublisher = it.bookPublisher,
@@ -315,7 +301,6 @@ fun ViewBooksGuest(navController: NavHostController){
                             bookLanguage = it.bookLanguage,
                             bookNumberOfPages = it.bookNumberOfPages,
                             bookAcquisitionMethod = it.bookAcquisitionMethod,
-                            bookCondition = it.bookCondition,
                             bookShelfNumber = it.bookShelfNumber,
                             bookSynopsis = it.bookSynopsis,
                             bookImageUrl = it.bookImageUrl,

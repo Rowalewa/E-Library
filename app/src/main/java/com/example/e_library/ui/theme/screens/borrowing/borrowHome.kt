@@ -73,6 +73,7 @@ import com.example.e_library.navigation.ROUTE_VIEW_ALL_BOOKS_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_CART_CLIENT
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_BORROWS
 import com.example.e_library.navigation.ROUTE_VIEW_CLIENT_INFO
+import com.example.e_library.navigation.ROUTE_VIEW_DELIVERY_PERSONNEL_CLIENT
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -199,6 +200,13 @@ fun BorrowHomeScreen(navController: NavHostController, clientId: String){
                     ) {
                         Text(
                             text = "View Deliveries"
+                        )
+                    }
+                    Button(onClick = { navController.navigate("$ROUTE_VIEW_DELIVERY_PERSONNEL_CLIENT/$clientId") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "View Delivery Personnel"
                         )
                     }
                 }
@@ -347,7 +355,6 @@ fun ClientAppTopBar(navController: NavController, clientId: String){
                     onClick = {
                         val myLogout = AuthViewModel(navController, context)
                         myLogout.clientlogout()
-                        Toast.makeText(context, "You have clicked sign out option: $clientId", Toast.LENGTH_LONG).show()
                     }
                 )
                 // Add more DropdownMenuItem for other account options

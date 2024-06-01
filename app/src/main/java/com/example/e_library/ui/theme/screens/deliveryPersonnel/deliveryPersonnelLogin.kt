@@ -54,8 +54,8 @@ fun DeliveryPersonnelLoginScreen(navController: NavController){
         modifier = Modifier.fillMaxSize()
     ){
         Image(
-            painter = painterResource(id = R.drawable.admin_login_screen),
-            contentDescription = "View Clients Image",
+            painter = painterResource(id = R.drawable.delivery_personnel_login),
+            contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.FillBounds
         )

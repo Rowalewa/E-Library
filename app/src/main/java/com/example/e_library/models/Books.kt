@@ -3,7 +3,6 @@ package com.example.e_library.models
 class Books {
     var bookTitle: String = ""
     var bookAuthor: String = ""
-    var bookYearOfPublication: String = ""
     var bookPrice: String = ""
     var bookISBNNumber: String = ""
     var bookPublisher: String = ""
@@ -13,7 +12,6 @@ class Books {
     var bookLanguage: String = ""
     var bookNumberOfPages: String = ""
     var bookAcquisitionMethod: String = ""
-    var bookCondition: String = ""
     var bookShelfNumber: String = ""
     var bookSynopsis: String = ""
     var bookImageUrl: String = ""
@@ -23,7 +21,6 @@ class Books {
     constructor(
         bookTitle: String,
         bookAuthor: String,
-        bookYearOfPublication: String,
         bookPrice: String,
         bookISBNNumber: String,
         bookPublisher: String,
@@ -33,7 +30,6 @@ class Books {
         bookLanguage: String,
         bookNumberOfPages: String,
         bookAcquisitionMethod: String,
-        bookCondition: String,
         bookShelfNumber: String,
         bookSynopsis: String,
         bookImageUrl: String,
@@ -42,11 +38,9 @@ class Books {
     ){
         this.bookTitle = bookTitle
         this.bookAuthor = bookAuthor
-        this.bookYearOfPublication = bookYearOfPublication
         this.bookPrice = bookPrice
         this.bookPublisher = bookPublisher
         this.bookPublicationDate = bookPublicationDate
-        this.bookCondition = bookCondition
         this.bookShelfNumber = bookShelfNumber
         this.bookSynopsis = bookSynopsis
         this.bookEdition = bookEdition

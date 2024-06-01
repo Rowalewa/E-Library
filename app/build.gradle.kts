@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -39,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -70,6 +72,19 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.firebase.messaging)
+    implementation(libs.play.services.maps)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.inappmessaging)
+    implementation(libs.firebase.inappmessaging.display)
+    implementation("androidx.activity:activity-ktx:1.3.0")
+    implementation("com.google.maps:google-maps-services:0.15.0")
+    implementation("com.google.maps.android:maps-compose:5.0.1")
+    // Street View metadata checks, etc.
+    implementation("com.google.maps.android:maps-compose-utils:5.0.1")
+    // Optionally, you can include the widgets library for ScaleBar, etc.
+    implementation("com.google.maps.android:maps-compose-widgets:5.0.1")
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

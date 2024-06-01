@@ -101,7 +101,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                 val bookLanguage by remember { mutableStateOf("") }
                 val bookNumberOfPages by remember { mutableStateOf("") }
                 val bookISBNNumber by remember { mutableStateOf("") }
-                val bookYearOfPublication by remember { mutableStateOf("") }
                 var bookQuantity by remember { mutableStateOf("") }
 
                 Text(
@@ -113,14 +112,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                     fontWeight = FontWeight.Bold,
                     textDecoration = TextDecoration.Underline
                 )
-
-                val mBookConditionOptions = listOf("New", "Used", "Damaged")
-                var mIsOpen by remember {
-                    mutableStateOf(false)
-                }
-                var mBookCondition by remember {
-                    mutableStateOf(mBookConditionOptions[0])
-                }
                 val mBookGenreOptions = listOf(
                     "Fiction",
                     "Non-Fiction",
@@ -193,13 +184,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                 var mBookNumberOfPages by remember { mutableStateOf(TextFieldValue(bookNumberOfPages)) }
                 var mBookISBNNumber by remember { mutableStateOf(TextFieldValue(bookISBNNumber)) }
                 var mBookQuantity by remember { mutableStateOf(TextFieldValue(bookQuantity)) }
-                var mBookYearOfPublication by remember {
-                    mutableStateOf(
-                        TextFieldValue(
-                            bookYearOfPublication
-                        )
-                    )
-                }
 
                 Log.d("Firebase", "Book ID: $bookId")
                 val currentDataRef =
@@ -214,7 +198,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                             if (book != null) {
                                 mBookTitle = TextFieldValue(book.bookTitle)
                                 mBookAuthor = TextFieldValue(book.bookAuthor)
-                                mBookYearOfPublication = TextFieldValue(book.bookYearOfPublication)
                                 bookPrice = book.bookPrice
                                 mBookISBNNumber = TextFieldValue(book.bookISBNNumber)
                                 mBookPublisher = TextFieldValue(book.bookPublisher)
@@ -224,7 +207,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                                 mBookLanguage = TextFieldValue(book.bookLanguage)
                                 mBookNumberOfPages = TextFieldValue(book.bookNumberOfPages)
                                 mBookAcquisitionMethod = book.bookAcquisitionMethod
-                                mBookCondition = book.bookCondition
                                 mBookShelfNumber = TextFieldValue(book.bookShelfNumber)
                                 mBookSynopsis = TextFieldValue(book.bookSynopsis)
                                 bookQuantity = book.bookQuantity.toString()
@@ -378,67 +360,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                         ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            top = 0.dp,
-                            bottom = 0.dp
-                        )
-                        .border(width = Dp.Hairline, color = Color.Black)
-                        .background(color = Color.White)
-                ) {
-                    Text(
-                        text = "Book Condition:",
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically),
-                        color = Color.Magenta
-                    )
-                    ExposedDropdownMenuBox(
-                        expanded = mIsOpen,
-                        onExpandedChange = { mIsOpen = !mIsOpen }
-                    ) {
-                        TextField(
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 10.dp,
-                                    end = 10.dp,
-                                    top = 0.dp,
-                                    bottom = 0.dp
-                                ),
-                            value = mBookCondition,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = mIsOpen) },
-                            colors = TextFieldDefaults.colors(
-                                focusedTextColor = Color.Magenta,
-                                unfocusedTextColor = Color.Red,
-                                focusedContainerColor = Color.Cyan,
-                                unfocusedContainerColor = Color.Green,
-                                disabledContainerColor = Color.White,
-                                focusedLabelColor = Color.Green,
-                                unfocusedLabelColor = Color.Magenta
-                            ),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = mIsOpen,
-                            onDismissRequest = { mIsOpen = false }) {
-                            mBookConditionOptions.forEachIndexed { index, text ->
-                                DropdownMenuItem(
-                                    text = { Text(text = text) },
-                                    onClick = { mBookCondition = mBookConditionOptions[index] },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                )
-                            }
-                        }
-
-                    }
-                }
-                Text(text = "Currently Selected: $mBookCondition")
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = mBookShelfNumber,
@@ -704,35 +625,9 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                     }
                 }
                 Text(text = "Currently Selected: $mBookAcquisitionMethod")
-                Spacer(modifier = Modifier.height(10.dp))
-                OutlinedTextField(
-                    value = mBookYearOfPublication,
-                    onValueChange = { mBookYearOfPublication = it },
-                    label = { Text(text = "Book Year Of Publication *") },
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Blue,
-                        unfocusedTextColor = Color.Cyan,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
-                        focusedLabelColor = Color.Green,
-                        unfocusedLabelColor = Color.Magenta,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            bottom = 0.dp,
-                            top = 0.dp
-                        ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-                )
                 var currentBook by remember {
                     mutableStateOf(
                         Books(
-                            "",
-                            "",
                             "",
                             "",
                             "",
@@ -773,8 +668,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                             "",
                             "",
                             "",
-                            "",
-                            "",
                             0,
                             ""
                         )
@@ -796,7 +689,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                     navController,
                     mBookTitle.text.trim(),
                     mBookAuthor.text.trim(),
-                    mBookYearOfPublication.text.trim(),
                     mBookPrice.text.trim(),
                     mBookISBNNumber.text.trim(),
                     mBookPublisher.text.trim(),
@@ -806,7 +698,6 @@ fun EditBooksScreen(navController: NavHostController, bookId: String, staffId: S
                     mBookLanguage.text.trim(),
                     mBookNumberOfPages.text.trim(),
                     mBookAcquisitionMethod.trim(),
-                    mBookCondition.trim(),
                     mBookShelfNumber.text.trim(),
                     mBookSynopsis.text.trim(),
                     bookId,
@@ -830,7 +721,6 @@ fun ImageUploader(
     navController: NavHostController,
     bookTitle: String,
     bookAuthor: String,
-    bookYearOfPublication: String,
     bookPrice: String,
     bookISBNNumber: String,
     bookPublisher: String,
@@ -840,7 +730,6 @@ fun ImageUploader(
     bookLanguage: String,
     bookNumberOfPages: String,
     bookAcquisitionMethod: String,
-    bookCondition: String,
     bookShelfNumber: String,
     bookSynopsis: String,
     bookId: String,
@@ -896,7 +785,6 @@ fun ImageUploader(
                     bookId,
                     bookTitle,
                     bookAuthor,
-                    bookYearOfPublication,
                     bookPrice,
                     bookISBNNumber,
                     bookPublisher,
@@ -906,7 +794,6 @@ fun ImageUploader(
                     bookLanguage,
                     bookNumberOfPages,
                     bookAcquisitionMethod,
-                    bookCondition,
                     bookShelfNumber,
                     bookSynopsis,
                     bookQuantity,
