@@ -1272,7 +1272,7 @@ class DeliveryViewModel(
                                                                                     }
                                                                                 }else{
                                                                                     progress.dismiss()
-                                                                                    Toast.makeText(context, "You have entered invalid library fine data, Is it an Integer?", Toast.LENGTH_LONG).show()
+                                                                                    Toast.makeText(context, "You have entered invalid library fine data, Is it a non-negative?", Toast.LENGTH_LONG).show()
                                                                                 }
                                                                             } else {
                                                                                 progress.dismiss()
