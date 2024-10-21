@@ -229,7 +229,7 @@ fun AdminEditHome(navController: NavController, adminId: String){
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp)
+                            .padding(11.dp)
                     )
                     Button(
                         onClick = { navController.navigate("$ROUTE_ADMIN_ATTENDANT_EDIT/$adminId") },
