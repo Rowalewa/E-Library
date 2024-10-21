@@ -161,7 +161,7 @@ fun AppNavHost() {
             passedData.arguments?.getString("adminId")?.let { AdminEditAccount(navController, it) }
         }
         composable("$ROUTE_ADMIN_ATTENDANT_EDIT/{adminId}"){passedData->
-            passedData.arguments?.getString("attendantId")?.let { AdminAttendantEdit(navController, it) }
+            passedData.arguments?.getString("adminId")?.let { AdminAttendantEdit(navController, it) }
         }
         composable("$ROUTE_ADD_BOOKS/{staffId}"){passedData->
             passedData.arguments?.getString("staffId")?.let { AddBooksScreen(navController, it) }
